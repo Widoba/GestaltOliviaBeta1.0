@@ -16,6 +16,7 @@ export interface Message {
   role: 'user' | 'assistant' | 'system';
   timestamp: Date;
   assistantType?: AssistantType;
+  structuredData?: any;
 }
 
 interface ChatContextType {
@@ -25,6 +26,7 @@ interface ChatContextType {
   isNearingContextLimit: boolean;
   sendMessage: (content: string) => Promise<void>;
   clearChat: () => void;
+  completeAction: (actionType: string, actionData: any) => Promise<void>;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -141,7 +143,8 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
           system: systemPrompt,
           activeAssistant: newAssistantType,
           preserveHistory: true,
-          trackTokenUsage: true
+          trackTokenUsage: true,
+          enableFunctionCalling: true
         }
       );
       
@@ -152,6 +155,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         role: 'assistant',
         timestamp: new Date(),
         assistantType: newAssistantType,
+        structuredData: response.structuredData
       };
       
       // Update messages with assistant response
@@ -187,6 +191,128 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     }
   }, [messages, activeAssistant]);
 
+  // Handle user actions (button clicks, form submissions, etc.)
+  const completeAction = useCallback(async (actionType: string, actionData: any) => {
+    setIsLoading(true);
+    try {
+      // Import the function calling service
+      const functionCallingService = (await import('../services/functionCallingService')).default;
+      
+      // Create a tool call object based on the action type
+      let toolCall;
+      
+      switch (actionType) {
+        case 'completeTask':
+          toolCall = {
+            id: `call_${Date.now()}`,
+            name: 'completeTask',
+            input: actionData
+          };
+          break;
+        case 'approveShiftSwap':
+          toolCall = {
+            id: `call_${Date.now()}`,
+            name: 'approveShiftSwap',
+            input: actionData
+          };
+          break;
+        case 'recognizeEmployee':
+          toolCall = {
+            id: `call_${Date.now()}`,
+            name: 'recognizeEmployee',
+            input: actionData
+          };
+          break;
+        case 'scheduleInterview':
+          toolCall = {
+            id: `call_${Date.now()}`,
+            name: 'scheduleInterview',
+            input: actionData
+          };
+          break;
+        default:
+          throw new Error(`Unknown action type: ${actionType}`);
+      }
+      
+      // Execute the tool call
+      const result = await functionCallingService.executeToolCall(toolCall);
+      
+      // Create a system message for the action
+      const systemMessage: Message = {
+        id: generateId(),
+        content: result.message || `Action ${actionType} completed successfully.`,
+        role: 'system',
+        timestamp: new Date(),
+        structuredData: { actionResult: { ...result, dataType: 'actionResult' } }
+      };
+      
+      // Add the system message to the chat
+      setMessages(prevMessages => [...prevMessages, systemMessage]);
+      
+      // Send a follow-up message asking Claude to acknowledge and respond
+      // Create an implicit message (not shown to user)
+      const implicitMessage: Message = {
+        id: generateId(),
+        content: `The user has completed an action: ${actionType} with result: ${JSON.stringify(result)}. Please acknowledge this action and provide any follow-up information or next steps.`,
+        role: 'user',
+        timestamp: new Date(),
+      };
+      
+      // We don't add this to the visible message array, but send it to the API
+      const newMessages = [...messages, systemMessage, implicitMessage];
+      
+      // Get appropriate system prompt
+      const systemPrompt = getSystemPrompt(activeAssistant, '');
+      
+      // Get a response from Claude acknowledging the action
+      const response = await contextEnhancedAnthropicService.sendMessage(
+        newMessages,
+        {
+          system: systemPrompt,
+          activeAssistant,
+          preserveHistory: true,
+          trackTokenUsage: true,
+          enableFunctionCalling: true
+        }
+      );
+      
+      // Add Claude's response to the chat
+      const assistantMessage: Message = {
+        id: generateId(),
+        content: response.content,
+        role: 'assistant',
+        timestamp: new Date(),
+        assistantType: activeAssistant,
+        structuredData: response.structuredData
+      };
+      
+      // Add only the system message and Claude's response
+      const finalMessages = [...messages, systemMessage, assistantMessage];
+      setMessages(finalMessages);
+      
+      // Persist conversation state
+      historyService.saveConversationState({
+        messages: finalMessages,
+        activeAssistant
+      });
+      
+    } catch (error) {
+      console.error('Error completing action:', error);
+      
+      // Add error message
+      const errorMessage: Message = {
+        id: generateId(),
+        content: `Sorry, there was an error completing the ${actionType} action. Please try again.`,
+        role: 'system',
+        timestamp: new Date(),
+      };
+      
+      setMessages(prevMessages => [...prevMessages, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [messages, activeAssistant]);
+
   // Clear the chat history
   const clearChat = useCallback(() => {
     setMessages([]);
@@ -203,7 +329,8 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         activeAssistant,
         isNearingContextLimit,
         sendMessage, 
-        clearChat 
+        clearChat,
+        completeAction
       }}
     >
       {children}

@@ -4,10 +4,13 @@
 import anthropicService, { 
   Message as ApiMessage, 
   AnthropicResponse, 
-  AnthropicAPIOptions 
+  AnthropicAPIOptions,
+  Tool,
+  ToolCall
 } from './anthropicService';
 import historyService, { ContextMetadata } from './historyService';
 import { Message, AssistantType } from '../contexts/ChatContext';
+import functionCallingService from './functionCallingService';
 
 /**
  * Options for context-enhanced API calls
@@ -16,6 +19,7 @@ export interface ContextEnhancedOptions extends AnthropicAPIOptions {
   activeAssistant: AssistantType;
   preserveHistory?: boolean;
   trackTokenUsage?: boolean;
+  enableFunctionCalling?: boolean;
 }
 
 /**
@@ -24,6 +28,7 @@ export interface ContextEnhancedOptions extends AnthropicAPIOptions {
 export interface ContextEnhancedResponse extends AnthropicResponse {
   contextMetadata?: ContextMetadata;
   truncatedMessageCount?: number;
+  structuredData?: any;
 }
 
 /**
@@ -61,17 +66,25 @@ class ContextEnhancedAnthropicService {
     
     // Track message truncation
     const truncatedMessageCount = messages.length - includedMessageCount;
+    
+    // Set up API options
+    const apiOptions: AnthropicAPIOptions = {
+      system: options.system,
+      temperature: options.temperature,
+      maxTokens: options.maxTokens,
+      retries: options.retries
+    };
+    
+    // Add tools if function calling is enabled
+    if (options.enableFunctionCalling) {
+      apiOptions.tools = functionCallingService.getAvailableTools();
+    }
       
     try {
       // Call the base Anthropic service
       const response = await anthropicService.sendMessage(
         optimizedApiMessages,
-        {
-          system: options.system,
-          temperature: options.temperature,
-          maxTokens: options.maxTokens,
-          retries: options.retries
-        }
+        apiOptions
       );
       
       // Calculate context metadata if requested
@@ -101,16 +114,95 @@ class ContextEnhancedAnthropicService {
         });
       }
       
+      // Handle tool calls if present
+      let structuredData: any = undefined;
+      
+      if (response.tool_calls && response.tool_calls.length > 0) {
+        const toolResults = await functionCallingService.executeToolCalls(response.tool_calls);
+        structuredData = this.processToolResults(toolResults);
+      }
+      
       // Return enhanced response
       return {
         ...response,
         contextMetadata,
-        truncatedMessageCount: truncatedMessageCount > 0 ? truncatedMessageCount : undefined
+        truncatedMessageCount: truncatedMessageCount > 0 ? truncatedMessageCount : undefined,
+        structuredData
       };
     } catch (error) {
       console.error('Error in context-enhanced API call:', error);
       throw error;
     }
+  }
+  
+  /**
+   * Process tool results into structured data for UI display
+   * @param toolResults Results from tool execution
+   * @returns Structured data for UI components
+   */
+  private processToolResults(toolResults: any[]): any {
+    // Extract and format data from tool results for card display
+    const structuredData: any = {};
+    
+    for (const result of toolResults) {
+      const { tool_call_id, result: toolResult } = result;
+      
+      // Process based on result content
+      if (toolResult.employee) {
+        structuredData.employee = {
+          ...toolResult.employee,
+          dataType: 'employee'
+        };
+      } else if (toolResult.employees) {
+        structuredData.employees = toolResult.employees.map((emp: any) => ({
+          ...emp,
+          dataType: 'employee'
+        }));
+      } else if (toolResult.tasks) {
+        structuredData.tasks = toolResult.tasks.map((task: any) => ({
+          ...task,
+          dataType: 'task'
+        }));
+      } else if (toolResult.shifts) {
+        structuredData.shifts = toolResult.shifts.map((shift: any) => ({
+          ...shift,
+          dataType: 'shift'
+        }));
+      } else if (toolResult.job) {
+        structuredData.job = {
+          ...toolResult.job,
+          dataType: 'job'
+        };
+      } else if (toolResult.jobs) {
+        structuredData.jobs = toolResult.jobs.map((job: any) => ({
+          ...job,
+          dataType: 'job'
+        }));
+      } else if (toolResult.candidate) {
+        structuredData.candidate = {
+          ...toolResult.candidate,
+          dataType: 'candidate'
+        };
+      } else if (toolResult.candidates) {
+        structuredData.candidates = toolResult.candidates.map((candidate: any) => ({
+          ...candidate,
+          dataType: 'candidate'
+        }));
+      } else if (toolResult.recognitions) {
+        structuredData.recognitions = toolResult.recognitions.map((recognition: any) => ({
+          ...recognition,
+          dataType: 'recognition'
+        }));
+      } else if (toolResult.success) {
+        // Action results (complete task, approve shift swap, etc.)
+        structuredData.actionResult = {
+          ...toolResult,
+          dataType: 'actionResult'
+        };
+      }
+    }
+    
+    return structuredData;
   }
   
   /**

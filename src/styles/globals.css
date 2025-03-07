@@ -139,4 +139,36 @@
       opacity: 0.8;
     }
   }
+  
+  /* Animation for cards */
+  .card-animate-in {
+    animation: card-fade-in 0.5s ease-out forwards;
+  }
+  
+  @keyframes card-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Staggered animation for card lists */
+  .card-list > *:nth-child(1) { animation-delay: 0.05s; }
+  .card-list > *:nth-child(2) { animation-delay: 0.1s; }
+  .card-list > *:nth-child(3) { animation-delay: 0.15s; }
+  .card-list > *:nth-child(4) { animation-delay: 0.2s; }
+  .card-list > *:nth-child(5) { animation-delay: 0.25s; }
+  
+  /* Button press effect */
+  .button-press {
+    @apply transition-transform duration-100;
+  }
+  
+  .button-press:active {
+    transform: scale(0.98);
+  }
 }

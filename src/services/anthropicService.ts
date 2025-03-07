@@ -13,6 +13,7 @@ export interface AnthropicResponse {
     input_tokens: number;
     output_tokens: number;
   };
+  tool_calls?: ToolCall[];
 }
 
 export interface AnthropicAPIOptions {
@@ -20,6 +21,24 @@ export interface AnthropicAPIOptions {
   maxTokens?: number;
   system?: string;
   retries?: number;
+  tools?: Tool[];
+}
+
+// Function calling interfaces
+export interface Tool {
+  name: string;
+  description: string;
+  input_schema: {
+    type: 'object';
+    properties: Record<string, any>;
+    required?: string[];
+  };
+}
+
+export interface ToolCall {
+  id: string;
+  name: string;
+  input: any;
 }
 
 // Default configuration
@@ -37,6 +56,7 @@ const DEFAULT_CONFIG = {
 class AnthropicService {
   private client: Anthropic;
   private defaultSystemPrompt: string;
+  private tools: Tool[] = [];
 
   constructor() {
     // Check if the API key is set
@@ -62,6 +82,14 @@ class AnthropicService {
    */
   setSystemPrompt(newPrompt: string): void {
     this.defaultSystemPrompt = newPrompt;
+  }
+
+  /**
+   * Set available tools for function calling
+   * @param tools Array of tools to make available to Claude
+   */
+  setTools(tools: Tool[]): void {
+    this.tools = tools;
   }
 
   /**
@@ -93,20 +121,46 @@ class AnthropicService {
     let attempt = 0;
     let lastError: Error | null = null;
 
+    // Use provided tools or default to the service's tools
+    const tools = options.tools || this.tools;
+
     while (attempt < maxRetries) {
       try {
-        const response = await this.client.messages.create({
+        const requestOptions: any = {
           model: DEFAULT_CONFIG.MODEL,
           messages: messages,
           temperature: options.temperature ?? DEFAULT_CONFIG.TEMPERATURE,
           max_tokens: options.maxTokens ?? DEFAULT_CONFIG.MAX_TOKENS,
           system: options.system ?? this.defaultSystemPrompt,
-        });
+        };
+
+        // Add tools if available
+        if (tools && tools.length > 0) {
+          requestOptions.tools = tools;
+        }
+
+        const response = await this.client.messages.create(requestOptions);
+
+        // Process tool calls if present
+        const toolCalls = response.content
+          .filter(item => item.type === 'tool_use')
+          .map(item => ({
+            id: item.id,
+            name: (item as any).tool_use.name,
+            input: (item as any).tool_use.input,
+          }));
+
+        // Extract text content
+        const textContent = response.content
+          .filter(item => item.type === 'text')
+          .map(item => item.text)
+          .join('');
 
         return {
-          content: response.content[0].text,
+          content: textContent,
           model: response.model,
           usage: response.usage,
+          tool_calls: toolCalls.length > 0 ? toolCalls : undefined
         };
       } catch (error) {
         attempt++;
