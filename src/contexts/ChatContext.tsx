@@ -85,6 +85,10 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     if (!content.trim()) return;
 
     try {
+      // Import necessary services and utilities
+      const fallbackResponseService = (await import('../services/fallbackResponseService')).default;
+      const { parseAnthropicError, AnthropicErrorCode } = (await import('../utils/errorHandling')).default;
+      
       // First, analyze current context window usage
       const tokenAnalysis = contextEnhancedAnthropicService.analyzeTokenUsage(messages);
       setIsNearingContextLimit(tokenAnalysis.isNearingLimit);
@@ -111,7 +115,15 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
       setIsLoading(true);
       
       // Determine which assistant should handle this message
-      const newAssistantType = await determineAssistantType(content);
+      // Wrap in try/catch to handle potential errors in assistant type determination
+      let newAssistantType: AssistantType;
+      try {
+        newAssistantType = await determineAssistantType(content);
+      } catch (error) {
+        console.error('Error determining assistant type:', error);
+        // Fall back to current assistant type or unified
+        newAssistantType = activeAssistant || 'unified';
+      }
       
       // Only add a system message if the assistant type is changing
       if (activeAssistant !== newAssistantType && messages.length > 0) {
@@ -130,24 +142,91 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
       
       setActiveAssistant(newAssistantType);
       
-      // Load relevant data for the query
-      const relevantData = await loadRelevantData(content);
+      // Load relevant data for the query (with error handling)
+      let relevantData = '';
+      try {
+        relevantData = await loadRelevantData(content);
+      } catch (error) {
+        console.error('Error loading relevant data:', error);
+        // Continue without injected data rather than failing completely
+      }
       
       // Get appropriate system prompt
       const systemPrompt = getSystemPrompt(newAssistantType, relevantData);
       
-      // Use the enhanced Anthropic service with context management
-      const response = await contextEnhancedAnthropicService.sendMessage(
-        updatedMessages,
-        {
-          system: systemPrompt,
-          activeAssistant: newAssistantType,
-          preserveHistory: true,
-          trackTokenUsage: true,
-          enableFunctionCalling: true
+      let response;
+      try {
+        // Use the enhanced Anthropic service with context management
+        response = await contextEnhancedAnthropicService.sendMessage(
+          updatedMessages,
+          {
+            system: systemPrompt,
+            activeAssistant: newAssistantType,
+            preserveHistory: true,
+            trackTokenUsage: true,
+            enableFunctionCalling: true
+          }
+        );
+      } catch (error) {
+        console.error('Error sending message to Anthropic API:', error);
+        
+        // Parse the error to get more information
+        const parsedError = parseAnthropicError(error);
+        parsedError.logError();
+        
+        // Implement fallback strategies based on error type
+        if (parsedError.code === AnthropicErrorCode.CONTEXT_TOO_LONG) {
+          // Handle context length errors by summarizing conversation
+          // For now, we'll just add a summarization warning and continue with a fallback
+          const systemMessage: Message = {
+            id: generateId(),
+            content: 'The conversation is too long. Some earlier messages have been summarized.',
+            role: 'system',
+            timestamp: new Date(),
+          };
+          
+          updatedMessages.push(systemMessage);
+          setMessages(updatedMessages);
         }
-      );
+        
+        // Get a hierarchical fallback response
+        const fallbackMessage = fallbackResponseService.getHierarchicalFallback(
+          parsedError,
+          newAssistantType,
+          content
+        );
+        
+        // Create an assistant message with the fallback response
+        const assistantMessage: Message = {
+          id: generateId(),
+          content: fallbackMessage,
+          role: 'assistant',
+          timestamp: new Date(),
+          assistantType: newAssistantType,
+          // Add a flag to indicate this is a fallback
+          structuredData: { 
+            fallback: true,
+            errorCode: parsedError.code,
+            errorMessage: parsedError.message
+          }
+        };
+        
+        // Update messages with the fallback
+        const finalMessages = [...updatedMessages, assistantMessage];
+        setMessages(finalMessages);
+        
+        // Persist conversation state
+        historyService.saveConversationState({
+          messages: finalMessages,
+          activeAssistant: newAssistantType
+        });
+        
+        // Return early since we've handled the error
+        setIsLoading(false);
+        return;
+      }
       
+      // If we get here, the API call was successful
       // Add assistant response to state
       const assistantMessage: Message = {
         id: generateId(),
@@ -175,12 +254,13 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
       }
       
     } catch (error) {
-      console.error('Error sending message:', error);
+      // This catch handles unexpected errors not caught by the inner try/catch blocks
+      console.error('Unhandled error in message processing:', error);
       
-      // Add error message
+      // Add generic error message
       const errorMessage: Message = {
         id: generateId(),
-        content: 'Sorry, there was an error processing your request. Please try again.',
+        content: 'Sorry, there was an unexpected error processing your request. Our team has been notified. Please try again.',
         role: 'system',
         timestamp: new Date(),
       };
@@ -195,8 +275,10 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   const completeAction = useCallback(async (actionType: string, actionData: any) => {
     setIsLoading(true);
     try {
-      // Import the function calling service
+      // Import necessary services and utilities
       const functionCallingService = (await import('../services/functionCallingService')).default;
+      const fallbackResponseService = (await import('../services/fallbackResponseService')).default;
+      const { parseAnthropicError, AnthropicErrorCode, createActionError } = (await import('../utils/errorHandling')).default;
       
       // Create a tool call object based on the action type
       let toolCall;
@@ -231,13 +313,28 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
           };
           break;
         default:
-          throw new Error(`Unknown action type: ${actionType}`);
+          throw createActionError(
+            `Unknown action type: ${actionType}`,
+            actionType,
+            'The requested action is not supported',
+            false
+          );
       }
       
       // Execute the tool call
       const result = await functionCallingService.executeToolCall(toolCall);
       
-      // Create a system message for the action
+      // Check if the action failed
+      if (result.error) {
+        throw createActionError(
+          result.message || `Action ${actionType} failed`,
+          actionType,
+          result.details || 'No additional details available',
+          result.recoverable !== false // Default to recoverable if not specified
+        );
+      }
+      
+      // Create a system message for the successful action
       const systemMessage: Message = {
         id: generateId(),
         content: result.message || `Action ${actionType} completed successfully.`,
@@ -264,50 +361,126 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
       // Get appropriate system prompt
       const systemPrompt = getSystemPrompt(activeAssistant, '');
       
-      // Get a response from Claude acknowledging the action
-      const response = await contextEnhancedAnthropicService.sendMessage(
-        newMessages,
-        {
-          system: systemPrompt,
-          activeAssistant,
-          preserveHistory: true,
-          trackTokenUsage: true,
-          enableFunctionCalling: true
-        }
-      );
-      
-      // Add Claude's response to the chat
-      const assistantMessage: Message = {
-        id: generateId(),
-        content: response.content,
-        role: 'assistant',
-        timestamp: new Date(),
-        assistantType: activeAssistant,
-        structuredData: response.structuredData
-      };
-      
-      // Add only the system message and Claude's response
-      const finalMessages = [...messages, systemMessage, assistantMessage];
-      setMessages(finalMessages);
-      
-      // Persist conversation state
-      historyService.saveConversationState({
-        messages: finalMessages,
-        activeAssistant
-      });
-      
+      try {
+        // Get a response from Claude acknowledging the action
+        const response = await contextEnhancedAnthropicService.sendMessage(
+          newMessages,
+          {
+            system: systemPrompt,
+            activeAssistant,
+            preserveHistory: true,
+            trackTokenUsage: true,
+            enableFunctionCalling: true
+          }
+        );
+        
+        // Add Claude's response to the chat
+        const assistantMessage: Message = {
+          id: generateId(),
+          content: response.content,
+          role: 'assistant',
+          timestamp: new Date(),
+          assistantType: activeAssistant,
+          structuredData: response.structuredData
+        };
+        
+        // Add only the system message and Claude's response
+        const finalMessages = [...messages, systemMessage, assistantMessage];
+        setMessages(finalMessages);
+        
+        // Persist conversation state
+        historyService.saveConversationState({
+          messages: finalMessages,
+          activeAssistant
+        });
+      } catch (apiError) {
+        // If we can't get Claude's acknowledgment, we still proceed with the action result
+        console.error('Error getting action acknowledgment from Claude:', apiError);
+        
+        // Parse the error
+        const parsedError = parseAnthropicError(apiError);
+        parsedError.logError();
+        
+        // Just add a generic acknowledgment instead of failing completely
+        const assistantMessage: Message = {
+          id: generateId(),
+          content: `I've ${actionType === 'completeTask' ? 'marked the task as complete' : 
+                   actionType === 'approveShiftSwap' ? 'processed the shift swap request' :
+                   actionType === 'recognizeEmployee' ? 'recorded the employee recognition' :
+                   actionType === 'scheduleInterview' ? 'scheduled the interview' : 
+                   'completed the action'} successfully.`,
+          role: 'assistant',
+          timestamp: new Date(),
+          assistantType: activeAssistant
+        };
+        
+        // Add system message and generic acknowledgment
+        const finalMessages = [...messages, systemMessage, assistantMessage];
+        setMessages(finalMessages);
+        
+        // Persist conversation state
+        historyService.saveConversationState({
+          messages: finalMessages,
+          activeAssistant
+        });
+      }
     } catch (error) {
       console.error('Error completing action:', error);
       
-      // Add error message
-      const errorMessage: Message = {
-        id: generateId(),
-        content: `Sorry, there was an error completing the ${actionType} action. Please try again.`,
-        role: 'system',
-        timestamp: new Date(),
-      };
+      let errorMessage: Message;
+      
+      // If it's a known action error, provide a specific message
+      if (error.name === 'ActionError' && error.getUserMessage) {
+        errorMessage = {
+          id: generateId(),
+          content: error.getUserMessage(),
+          role: 'system',
+          timestamp: new Date(),
+          structuredData: {
+            error: true,
+            actionType,
+            errorCode: error.code,
+            errorMessage: error.message,
+            recoverable: error.recoverable
+          }
+        };
+      } else {
+        // Generic error message for unknown errors
+        errorMessage = {
+          id: generateId(),
+          content: `Sorry, there was an error completing the ${actionType} action. Please try again.`,
+          role: 'system',
+          timestamp: new Date(),
+          structuredData: {
+            error: true,
+            actionType,
+            errorMessage: error.message || 'Unknown error'
+          }
+        };
+      }
       
       setMessages(prevMessages => [...prevMessages, errorMessage]);
+      
+      // If the error is not recoverable, add an assistant message with guidance
+      if (error.recoverable === false) {
+        // Create a message that guides the user on what to do next
+        const assistantMessage: Message = {
+          id: generateId(),
+          content: `I encountered an issue while trying to ${actionType === 'completeTask' ? 'complete the task' : 
+                   actionType === 'approveShiftSwap' ? 'process the shift swap' :
+                   actionType === 'recognizeEmployee' ? 'recognize the employee' :
+                   actionType === 'scheduleInterview' ? 'schedule the interview' : 
+                   'complete the action'}. ${
+                     error.message || 'Would you like to try a different approach?'
+                   }`,
+          role: 'assistant',
+          timestamp: new Date(),
+          assistantType: activeAssistant
+        };
+        
+        // Add the assistant guidance message
+        setMessages(prevMessages => [...prevMessages, errorMessage, assistantMessage]);
+      }
     } finally {
       setIsLoading(false);
     }

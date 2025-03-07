@@ -42,6 +42,8 @@ The application follows a modular architecture with clear separation of concerns
 | **Query Analysis** | Determines intent and extracts entities to route to the right assistant |
 | **Data Injection** | Provides relevant contextual data for accurate responses |
 | **Prompt Engineering** | Defines assistant personalities and behavior guidelines |
+| **Function Calling** | Enables structured data retrieval and action execution |
+| **Error Handling** | Ensures graceful degradation during failures |
 
 ## Data Structure Documentation
 
@@ -229,6 +231,37 @@ interface Message {
   role: 'user' | 'assistant' | 'system';
   timestamp: Date;
   assistantType?: 'unified' | 'employee' | 'talent';
+  structuredData?: StructuredDataResponse;
+}
+```
+
+#### Function Calling Interfaces
+
+```typescript
+interface FunctionCallRequest {
+  name: string;
+  arguments: Record<string, any>;
+}
+
+interface FunctionCallResponse {
+  name: string;
+  result: Record<string, any>;
+  error?: string;
+}
+
+interface StructuredDataResponse {
+  type: 'employee' | 'task' | 'shift' | 'candidate' | 'job';
+  data: any[];
+  actions?: ActionButton[];
+}
+
+interface ActionButton {
+  id: string;
+  label: string;
+  action: string;
+  entityId: string;
+  entityType: string;
+  variant?: 'primary' | 'secondary' | 'success' | 'danger';
 }
 ```
 
@@ -271,6 +304,35 @@ enum IntentCategory {
   INTERVIEW_PROCESS = 'interview_process',
   HIRING_WORKFLOW = 'hiring_workflow',
   GENERAL_QUESTION = 'general_question',
+}
+```
+
+#### Error Handling Interfaces
+
+```typescript
+enum ErrorCategory {
+  API_ERROR = 'api_error',
+  DATA_ERROR = 'data_error',
+  FUNCTION_ERROR = 'function_error',
+  USER_ACTION_ERROR = 'user_action_error',
+  SYSTEM_ERROR = 'system_error',
+}
+
+enum ErrorSeverity {
+  FATAL = 'fatal',     // Unrecoverable error that prevents continued operation
+  ERROR = 'error',     // Serious error that affects functionality
+  WARNING = 'warning', // Issue that doesn't stop operation but should be addressed
+  INFO = 'info',       // Informational message about a potential issue
+}
+
+interface AppError extends Error {
+  category: ErrorCategory;
+  severity: ErrorSeverity;
+  recoverable: boolean;
+  errorCode: string;
+  userMessage: string;
+  context?: Record<string, any>;
+  originalError?: Error;
 }
 ```
 
@@ -481,6 +543,430 @@ async analyzeQuery(query: string): Promise<QueryAnalysis> {
 }
 ```
 
+### Enhanced Responses
+
+#### Core Functionality
+Enables the assistant to retrieve structured data and perform actions through a function calling mechanism, displaying the results in an interactive card-based UI.
+
+#### File Locations
+
+- `/src/services/anthropicService.ts` - Claude API integration with function calling
+- `/src/services/functionCallingService.ts` - Function definitions and execution logic
+- `/src/services/contextEnhancedAnthropicService.ts` - Integration of function calls with context
+- `/src/components/cards/BaseCard.tsx` - Foundation for all card components
+- `/src/components/cards/EmployeeCard.tsx` - Employee data visualization
+- `/src/components/cards/TaskCard.tsx` - Task data with action buttons
+- `/src/components/cards/ShiftCard.tsx` - Shift data with approval actions
+- `/src/components/cards/CandidateCard.tsx` - Candidate profile visualization
+- `/src/components/cards/JobCard.tsx` - Job posting details
+- `/src/components/StructuredDataDisplay.tsx` - Container for structured data visualization
+
+#### Key Methods/Functions
+
+- `callFunctionWithName(name, args)`: Executes a function by name with provided arguments
+- `registerFunction(name, fn, schema)`: Registers a function for the function calling system
+- `handleFunctionCall(functionCall)`: Processes a function call from Claude
+- `processFunctionResults(results)`: Integrates function results into the conversation
+- `renderStructuredData(data)`: Renders appropriate card components based on data type
+- `completeAction(actionId, entityId, entityType)`: Executes actions triggered by UI buttons
+
+#### Dependencies
+
+- Integrated with Anthropic API via anthropicService
+- Used by ChatContext for handling function calls in messages
+- Depends on card components for data visualization
+
+#### Key Implementation Details
+
+Function calling implementation:
+
+```typescript
+// From anthropicService.ts
+/**
+ * Send a message to Claude with function calling capabilities
+ * @param messages Message history
+ * @param systemPrompt System prompt
+ * @param functions Available functions
+ * @returns Claude's response with potential function calls
+ */
+async sendMessageWithFunctions(
+  messages: Message[], 
+  systemPrompt: string,
+  functions: FunctionDefinition[]
+): Promise<AnthropicResponse> {
+  try {
+    // Format messages for Anthropic API
+    const formattedMessages = this.formatMessagesForAPI(messages);
+    
+    // Make API request with function definitions
+    const response = await this.client.messages.create({
+      model: this.model,
+      max_tokens: this.maxTokens,
+      system: systemPrompt,
+      messages: formattedMessages,
+      tools: [{
+        type: "function",
+        functions: functions
+      }]
+    });
+    
+    // Process and return response
+    return this.processResponse(response);
+  } catch (error) {
+    this.handleApiError(error);
+  }
+}
+```
+
+Card component implementation:
+
+```tsx
+// From TaskCard.tsx
+const TaskCard: React.FC<TaskCardProps> = ({ task, onActionClick }) => {
+  const priorityColor = getPriorityColor(task.priority);
+  const statusBadge = getStatusBadge(task.status);
+  const dueDate = new Date(task.due_date);
+  const isOverdue = dueDate < new Date() && task.status !== 'completed';
+  
+  return (
+    <BaseCard
+      title={task.title}
+      subtitle={`Task ID: ${task.task_id}`}
+      icon={<TaskIcon />}
+      headerColor={priorityColor}
+      badges={[statusBadge]}
+    >
+      <div className="task-details">
+        <p className="task-description">{task.description}</p>
+        
+        <div className="task-metadata">
+          <MetadataItem label="Due Date" value={formatDate(task.due_date)} isAlert={isOverdue} />
+          <MetadataItem label="Priority" value={capitalizeFirst(task.priority)} />
+          <MetadataItem label="Type" value={formatTaskType(task.task_type)} />
+        </div>
+        
+        {task.status !== 'completed' && (
+          <div className="task-actions">
+            <ActionButton 
+              label="Complete Task" 
+              onClick={() => onActionClick('complete', task.task_id, 'task')}
+              variant={isOverdue ? 'danger' : 'primary'}
+            />
+            {task.task_type === 'approve_swap' && (
+              <>
+                <ActionButton 
+                  label="Approve" 
+                  onClick={() => onActionClick('approve', task.task_id, 'task')}
+                  variant="success"
+                />
+                <ActionButton 
+                  label="Deny" 
+                  onClick={() => onActionClick('deny', task.task_id, 'task')}
+                  variant="secondary"
+                />
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    </BaseCard>
+  );
+};
+```
+
+Structured data display:
+
+```tsx
+// From StructuredDataDisplay.tsx
+const StructuredDataDisplay: React.FC<StructuredDataDisplayProps> = ({ 
+  data, 
+  onActionClick 
+}) => {
+  // Select appropriate card type based on data type
+  const renderCards = () => {
+    if (!data || !data.data || data.data.length === 0) {
+      return <EmptyState message="No data available" />;
+    }
+    
+    switch (data.type) {
+      case 'employee':
+        return data.data.map(employee => (
+          <EmployeeCard 
+            key={employee.employee_id} 
+            employee={employee}
+            onActionClick={onActionClick}
+            actions={data.actions?.filter(a => a.entityId === employee.employee_id)}
+          />
+        ));
+      case 'task':
+        return data.data.map(task => (
+          <TaskCard 
+            key={task.task_id} 
+            task={task}
+            onActionClick={onActionClick} 
+          />
+        ));
+      case 'shift':
+        return data.data.map(shift => (
+          <ShiftCard 
+            key={shift.shift_id} 
+            shift={shift}
+            onActionClick={onActionClick}
+          />
+        ));
+      case 'candidate':
+        return data.data.map(candidate => (
+          <CandidateCard 
+            key={candidate.candidate_id} 
+            candidate={candidate}
+            onActionClick={onActionClick}
+          />
+        ));
+      case 'job':
+        return data.data.map(job => (
+          <JobCard 
+            key={job.job_req_id} 
+            job={job}
+            onActionClick={onActionClick}
+          />
+        ));
+      default:
+        return <GenericDataDisplay data={data.data} />;
+    }
+  };
+
+  return (
+    <div className="structured-data-container">
+      {renderCards()}
+    </div>
+  );
+};
+```
+
+### Error Handling
+
+#### Core Functionality
+Provides robust error handling throughout the application, including API errors, data errors, and user action errors, with graceful degradation and meaningful feedback.
+
+#### File Locations
+
+- `/src/services/errorHandling.ts` - Core error handling utilities and error classes
+- `/src/services/contextEnhancedAnthropicService.ts` - API error handling and retry logic
+- `/src/services/functionCallingService.ts` - Function call error handling
+- `/src/services/fallbackResponseService.ts` - Fallback responses for error conditions
+- `/src/components/ErrorBoundary.tsx` - React error boundary component
+- `/src/components/ErrorDisplay.tsx` - Error visualization component
+
+#### Key Methods/Functions
+
+- `createApiError(message, options)`: Creates a standardized API error
+- `handleApiError(error, retryCount)`: Handles API errors with retry logic
+- `createDataError(message, options)`: Creates a standardized data error
+- `handleDataRetrievalError(error, partialData)`: Processes data retrieval errors
+- `generateFallbackResponse(query, errorType)`: Creates fallback responses
+- `logError(error, context)`: Structured error logging
+- `recoverFromError(error)`: Attempts to recover from recoverable errors
+
+#### Dependencies
+
+- Used throughout the application for consistent error handling
+- Integrated with ChatContext for error state management
+- Utilized by UI components for error display
+
+#### Key Implementation Details
+
+Error taxonomy and handling:
+
+```typescript
+// From errorHandling.ts
+/**
+ * Create a standardized API error
+ * @param message Error message
+ * @param options Additional error options
+ * @returns Structured API error
+ */
+export function createApiError(
+  message: string, 
+  options: Partial<AppErrorOptions> = {}
+): AppError {
+  return new AppError({
+    message,
+    category: ErrorCategory.API_ERROR,
+    severity: options.severity || ErrorSeverity.ERROR,
+    recoverable: options.recoverable !== undefined ? options.recoverable : true,
+    errorCode: options.errorCode || 'API_ERROR',
+    userMessage: options.userMessage || 'There was a problem connecting to the service. Please try again.',
+    context: options.context,
+    originalError: options.originalError
+  });
+}
+
+/**
+ * Handle API errors with retry logic for transient issues
+ * @param error The original error
+ * @param retryCount Current retry count
+ * @param maxRetries Maximum number of retries
+ * @param retryDelay Base delay between retries in ms
+ * @returns Promise that resolves if retry succeeds, or rejects with enhanced error
+ */
+export async function handleApiError(
+  error: any,
+  retryCount = 0,
+  maxRetries = 3,
+  retryDelay = 500
+): Promise<never> {
+  // Enhance error with additional context
+  const appError = error instanceof AppError 
+    ? error 
+    : createApiError(error.message || 'Unknown API error', {
+        originalError: error,
+        context: { retryCount, maxRetries }
+      });
+  
+  // Log the error
+  logError(appError, { retryCount, maxRetries });
+  
+  // Determine if retry is possible
+  const canRetry = appError.recoverable && 
+    retryCount < maxRetries && 
+    isRetryableStatusCode(error.status);
+  
+  if (canRetry) {
+    // Calculate exponential backoff with jitter
+    const delay = calculateBackoffWithJitter(retryDelay, retryCount);
+    
+    // Wait before retrying
+    await new Promise(resolve => setTimeout(resolve, delay));
+    
+    // Update context and return for retry
+    appError.context = { ...appError.context, retryCount: retryCount + 1 };
+    throw appError;
+  } else {
+    // No more retries, add severity based on retry exhaustion
+    if (retryCount > 0 && retryCount >= maxRetries) {
+      appError.severity = ErrorSeverity.ERROR;
+      appError.userMessage = 'Service is currently unavailable after multiple attempts. Please try again later.';
+    }
+    
+    throw appError;
+  }
+}
+```
+
+Fallback response system:
+
+```typescript
+// From fallbackResponseService.ts
+/**
+ * Generate a fallback response based on the query and error type
+ * @param query The original user query
+ * @param errorType Type of error that occurred
+ * @param assistantType Current assistant type
+ * @returns Appropriate fallback response
+ */
+export function generateFallbackResponse(
+  query: string,
+  errorType: ErrorCategory,
+  assistantType: AssistantType = 'unified'
+): string {
+  // Check for assistant-specific fallbacks first
+  const assistantFallback = getAssistantSpecificFallback(errorType, assistantType);
+  if (assistantFallback) return assistantFallback;
+  
+  // Check for query-specific fallbacks
+  const queryFallback = getQueryContextFallback(query, errorType);
+  if (queryFallback) return queryFallback;
+  
+  // Generic fallbacks by error type
+  switch (errorType) {
+    case ErrorCategory.API_ERROR:
+      return "I'm having trouble connecting to our systems right now. Let's try again in a moment, or you can ask me something else.";
+    
+    case ErrorCategory.DATA_ERROR:
+      return "I couldn't retrieve the specific information you're looking for. Can you verify the details or try a different query?";
+    
+    case ErrorCategory.FUNCTION_ERROR:
+      return "I wasn't able to complete that action successfully. There might be a technical issue or the action may not be available right now.";
+    
+    case ErrorCategory.USER_ACTION_ERROR:
+      return "I couldn't process that request. Please check the information provided and try again.";
+    
+    case ErrorCategory.SYSTEM_ERROR:
+    default:
+      return "I'm experiencing a technical issue right now. Please try again later, or contact support if the problem persists.";
+  }
+}
+
+/**
+ * Get assistant-specific fallbacks based on the current assistant
+ */
+function getAssistantSpecificFallback(
+  errorType: ErrorCategory,
+  assistantType: AssistantType
+): string | null {
+  if (assistantType === 'employee') {
+    if (errorType === ErrorCategory.DATA_ERROR) {
+      return "I'm having trouble accessing the employee information system right now. I can help with general questions, or we can try again in a moment.";
+    }
+  } else if (assistantType === 'talent') {
+    if (errorType === ErrorCategory.DATA_ERROR) {
+      return "I'm unable to access the recruitment information system at the moment. I can answer general questions about recruitment processes, or we can try again later.";
+    }
+  }
+  
+  return null;
+}
+```
+
+Error boundary component:
+
+```tsx
+// From ErrorBoundary.tsx
+export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false, error: null, errorInfo: null };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    // Update state so the next render will show the fallback UI
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+    // Log the error
+    logError(error, { component: this.props.componentName, errorInfo });
+    this.setState({ errorInfo });
+    
+    // Call optional error handler
+    if (this.props.onError) {
+      this.props.onError(error, errorInfo);
+    }
+  }
+
+  resetError = (): void => {
+    this.setState({ hasError: false, error: null, errorInfo: null });
+  }
+
+  render(): React.ReactNode {
+    if (this.state.hasError) {
+      // Render the fallback UI
+      return (
+        <div className="error-boundary">
+          <ErrorDisplay 
+            error={this.state.error!}
+            componentName={this.props.componentName}
+            onReset={this.resetError}
+          />
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+```
+
 ### UI Components and Interaction Patterns
 
 #### Core Functionality
@@ -596,22 +1082,27 @@ We have successfully implemented:
 - Created visual assistant switching cues
 - Implemented typing indicators and loading states
 
+#### Enhanced Responses:
+
+- Implemented function calling for data retrieval via anthropicService.ts
+- Created card-based UI components for displaying structured data 
+- Developed specialized cards for different data types (Employee, Task, Shift, Candidate, Job)
+- Added interactive action buttons for task completion, shift approval, etc.
+- Integrated StructuredDataDisplay component for organized data presentation
+
+#### Error Handling:
+
+- Developed comprehensive error taxonomy with categories and severity levels
+- Implemented structured error classes with meaningful user messages
+- Added API error handling with retry mechanisms and exponential backoff
+- Created fallback response system for graceful degradation
+- Implemented UI-level error handling with React ErrorBoundary components
+- Added data retrieval error handling with partial data support
+
 ### Current Phase
-We are currently in Phase 3: Chat Experience & UI Integration, specifically after completing Step 1 (Interaction Patterns).
+We are currently in Phase 4: Quality Assurance & Optimization, specifically ready to begin Step 1 (Prompt Tuning).
 
 ### Remaining Tasks
-
-#### Enhanced Responses (Phase 3, Step 2):
-
-- Implement function calling for data retrieval
-- Create card-based UI for displaying structured data (schedules, tasks, etc.)
-- Build clickable action buttons for task completion
-
-#### Error Handling (Phase 3, Step 3):
-
-- Create graceful degradation when API calls fail
-- Implement retry logic for intermittent failures
-- Build fallback responses for when data is unavailable
 
 #### Prompt Tuning (Phase 4, Step 1):
 
@@ -670,6 +1161,23 @@ We use a combination of:
 - Composition for UI component reusability
 - Performance optimizations like memoization
 
+#### Function Calling Architecture:
+We implemented a flexible function calling system that:
+
+- Defines function schemas in a central registry
+- Supports both synchronous and asynchronous function execution
+- Handles errors gracefully with fallback mechanisms
+- Provides structured data responses for UI rendering
+
+#### Error Handling Strategy:
+We developed a multi-layered error handling approach:
+
+- Categorized errors by type (API, data, function, user action, system)
+- Assigned severity levels to prioritize error handling
+- Created recoverable vs. non-recoverable error distinction
+- Implemented hierarchical fallback responses
+- Added visual error feedback with user recovery options
+
 ### Challenges and Solutions
 
 #### Context Window Management:
@@ -691,6 +1199,16 @@ We use a combination of:
 
 - Challenge: Switching between assistants could be jarring to users.
 - Solution: Created smooth visual transitions and maintained conversation context across assistant switches.
+
+#### Function Call Error Handling:
+
+- Challenge: Function calls can fail due to various reasons (data unavailability, permissions, system issues).
+- Solution: Implemented partial data handling, graceful degradation, and clear error messaging tied to specific function failures.
+
+#### Structured Data Presentation:
+
+- Challenge: Presenting complex structured data in a chat interface can be unwieldy.
+- Solution: Developed card-based UI components optimized for different data types with interactive elements for common actions.
 
 ### Trade-offs
 
@@ -714,9 +1232,19 @@ We use a combination of:
 - We dynamically adjust data detail level based on query specificity.
 - Trade-off: Some queries might receive less detailed data, but we ensure the most relevant information is included.
 
-## Conclusion
-The Unified Assistant Prototype has successfully implemented a seamless chat experience that intelligently routes between an Employee Assistant and a Talent Acquisition Assistant. The system uses sophisticated prompt engineering, context management, and data injection to provide accurate, contextually relevant responses while maintaining a cohesive conversation flow.
+#### Error Recovery vs. User Notification:
 
-As development continues, the focus will shift to enhancing the response capabilities, implementing robust error handling, tuning the prompts, optimizing performance, and conducting thorough user flow testing. The modular architecture we've established provides a solid foundation for these future improvements.
+- We automatically retry recoverable errors but provide clear notifications for non-recoverable errors.
+- Trade-off: Potential slight delays during retries, but higher success rates and better user experience overall.
+
+#### Function Calling Flexibility vs. Predictability:
+
+- We allow Claude to determine which functions to call rather than hardcoding function calls for specific intents.
+- Trade-off: More flexibility and natural interactions, but occasionally less predictable behavior requiring additional prompt tuning.
+
+## Conclusion
+The Unified Assistant Prototype has successfully implemented a seamless chat experience that intelligently routes between an Employee Assistant and a Talent Acquisition Assistant. The system uses sophisticated prompt engineering, context management, data injection, function calling, and error handling to provide accurate, contextually relevant responses while maintaining a cohesive conversation flow.
+
+As development continues, the focus will shift to tuning the prompts, optimizing performance, and conducting thorough user flow testing. The modular architecture we've established provides a solid foundation for these future improvements, with enhanced responses and robust error handling already in place.
 
 This development summary was created on March 7, 2025, and represents the project state as of that date.

@@ -60,6 +60,14 @@ class ContextEnhancedAnthropicService {
     messages: Message[],
     options: ContextEnhancedOptions
   ): Promise<ContextEnhancedResponse> {
+    // Import error handling utilities
+    const { 
+      parseAnthropicError, 
+      AnthropicErrorCode,
+      ErrorSeverity,
+      ErrorCategory
+    } = (await import('../utils/errorHandling')).default;
+    
     // Prepare messages for the API request
     const { messages: optimizedApiMessages, includedMessageCount } = 
       historyService.prepareMessagesForRequest(messages, options.activeAssistant);
@@ -118,8 +126,20 @@ class ContextEnhancedAnthropicService {
       let structuredData: any = undefined;
       
       if (response.tool_calls && response.tool_calls.length > 0) {
-        const toolResults = await functionCallingService.executeToolCalls(response.tool_calls);
-        structuredData = this.processToolResults(toolResults);
+        try {
+          const toolResults = await functionCallingService.executeToolCalls(response.tool_calls);
+          structuredData = this.processToolResults(toolResults);
+        } catch (toolError) {
+          console.error('Error executing tool calls:', toolError);
+          
+          // Even if tool calls fail, we can still return the main response
+          // We just add an error to the structured data
+          structuredData = {
+            error: true,
+            message: 'Failed to retrieve additional information',
+            partialResults: true
+          };
+        }
       }
       
       // Return enhanced response
@@ -131,7 +151,30 @@ class ContextEnhancedAnthropicService {
       };
     } catch (error) {
       console.error('Error in context-enhanced API call:', error);
-      throw error;
+      
+      // Parse the error into a structured AnthropicError
+      const parsedError = parseAnthropicError(error);
+      
+      // Log the structured error
+      parsedError.logError();
+      
+      // If the error is retryable and we have retries left, we could implement retry logic here
+      // But for now, we'll just propagate the error upward with improved context
+      
+      // For certain error types, we can provide a fallback response instead of failing completely
+      if (parsedError.code === AnthropicErrorCode.CONTEXT_TOO_LONG) {
+        // For context length errors, we can try again with a summary of the conversation
+        // This would be implemented in a production system
+        console.warn('Context too long, would attempt summarization in production');
+      }
+      
+      if (parsedError.code === AnthropicErrorCode.RATE_LIMIT) {
+        // For rate limit errors, we could delay and retry
+        console.warn(`Rate limited, would wait ${parsedError.retryAfter || 5} seconds in production`);
+      }
+      
+      // Rethrow the structured error for the caller to handle
+      throw parsedError;
     }
   }
   

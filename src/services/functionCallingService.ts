@@ -31,7 +31,33 @@ class FunctionCallingService {
    * @returns Result of the tool execution
    */
   async executeToolCall(toolCall: ToolCall): Promise<any> {
+    // Import error handling utilities
+    const { 
+      AnthropicErrorCode, 
+      createDataError, 
+      createActionError 
+    } = (await import('../utils/errorHandling')).default;
+
     try {
+      // Validate the tool call exists
+      if (!toolCall || !toolCall.name) {
+        throw createDataError(
+          'Invalid tool call: missing name',
+          AnthropicErrorCode.VALIDATION_ERROR,
+          { toolCall }
+        );
+      }
+      
+      // Validate input exists
+      if (!toolCall.input) {
+        throw createDataError(
+          `Invalid tool call: missing input for ${toolCall.name}`,
+          AnthropicErrorCode.VALIDATION_ERROR,
+          { toolCall }
+        );
+      }
+
+      // Execute the appropriate tool
       switch (toolCall.name) {
         case 'getEmployeeData':
           return await this.executeGetEmployeeData(toolCall.input);
@@ -54,13 +80,56 @@ class FunctionCallingService {
         case 'scheduleInterview':
           return await this.executeScheduleInterview(toolCall.input);
         default:
-          throw new Error(`Unknown tool: ${toolCall.name}`);
+          throw createDataError(
+            `Unknown tool: ${toolCall.name}`,
+            AnthropicErrorCode.FUNCTION_EXECUTION_ERROR,
+            { toolCall }
+          );
       }
     } catch (error) {
+      // Log the error for debugging
       console.error(`Error executing tool call ${toolCall.name}:`, error);
+      
+      // Create a structured error response
+      let errorMessage: string;
+      let errorCode: string;
+      let success = false;
+      
+      if (error instanceof Error) {
+        // Handle different error types
+        if ('code' in error) {
+          // It's one of our custom errors
+          errorCode = (error as any).code;
+          
+          if (error.name === 'DataError') {
+            errorMessage = `Couldn't retrieve the requested data: ${error.message}`;
+          } else if (error.name === 'ActionError') {
+            errorMessage = (error as any).getUserMessage?.() || 
+              `The action couldn't be completed: ${error.message}`;
+          } else {
+            errorMessage = `Error: ${error.message}`;
+          }
+        } else {
+          // Generic error
+          errorCode = 'error';
+          errorMessage = `Error executing ${toolCall.name}: ${error.message}`;
+        }
+      } else {
+        // Unknown error type
+        errorCode = 'unknown_error';
+        errorMessage = `An unexpected error occurred while executing ${toolCall.name}`;
+      }
+
+      // Return a structured error response
       return {
         error: true,
-        message: `Failed to execute ${toolCall.name}: ${(error as Error).message}`
+        success,
+        code: errorCode,
+        message: errorMessage,
+        timestamp: new Date().toISOString(),
+        toolName: toolCall.name,
+        // Include partial data if available
+        partialData: (error as any).partialData || null
       };
     }
   }
@@ -72,13 +141,42 @@ class FunctionCallingService {
    */
   async executeToolCalls(toolCalls: ToolCall[]): Promise<any[]> {
     const results = [];
-    for (const toolCall of toolCalls) {
-      const result = await this.executeToolCall(toolCall);
-      results.push({
-        tool_call_id: toolCall.id,
-        result
-      });
+    
+    // Check if we have any tool calls to execute
+    if (!toolCalls || toolCalls.length === 0) {
+      return [];
     }
+    
+    // Execute tool calls in parallel for better performance
+    const toolCallPromises = toolCalls.map(async (toolCall) => {
+      try {
+        const result = await this.executeToolCall(toolCall);
+        return {
+          tool_call_id: toolCall.id,
+          result
+        };
+      } catch (error) {
+        console.error(`Unhandled error in executeToolCall for ${toolCall.name}:`, error);
+        return {
+          tool_call_id: toolCall.id,
+          result: {
+            error: true,
+            success: false,
+            message: 'An unexpected error occurred during tool execution',
+            timestamp: new Date().toISOString()
+          }
+        };
+      }
+    });
+    
+    // Wait for all tool calls to complete
+    const toolResults = await Promise.all(toolCallPromises);
+    
+    // Add each result to the results array
+    for (const result of toolResults) {
+      results.push(result);
+    }
+    
     return results;
   }
 
@@ -398,25 +496,141 @@ class FunctionCallingService {
    * Execute getEmployeeData tool
    */
   private async executeGetEmployeeData(input: any): Promise<any> {
+    // Import error handling utilities
+    const { AnthropicErrorCode, createDataError } = (await import('../utils/errorHandling')).default;
+    
     try {
       let employees;
-
+      let partialData = false;
+      
+      // Handle specific employee lookup
       if (input.employeeId) {
-        const employee = await dataService.getEmployeeById(input.employeeId);
-        return { employee };
-      } else if (input.managerId) {
-        employees = await dataService.getEmployeesByManager(input.managerId);
-      } else if (input.department) {
-        employees = await dataService.getEmployeesByDepartment(input.department);
-      } else {
-        employees = await dataService.getEmployees();
+        try {
+          const employee = await dataService.getEmployeeById(input.employeeId);
+          
+          // If employee not found, throw appropriate error
+          if (!employee) {
+            throw createDataError(
+              `Employee with ID ${input.employeeId} not found`,
+              AnthropicErrorCode.DATA_NOT_FOUND,
+              { employeeId: input.employeeId }
+            );
+          }
+          
+          return { 
+            success: true,
+            employee 
+          };
+        } catch (error) {
+          // Log the specific error for employee lookup
+          console.error(`Error retrieving employee with ID ${input.employeeId}:`, error);
+          throw error;
+        }
+      } 
+      
+      // Handle employees by manager
+      else if (input.managerId) {
+        try {
+          // First validate that the manager exists
+          const manager = await dataService.getEmployeeById(input.managerId);
+          if (!manager) {
+            throw createDataError(
+              `Manager with ID ${input.managerId} not found`,
+              AnthropicErrorCode.DATA_NOT_FOUND,
+              { managerId: input.managerId }
+            );
+          }
+          
+          employees = await dataService.getEmployeesByManager(input.managerId);
+          
+          // If no direct reports, provide specific message
+          if (employees.length === 0) {
+            return { 
+              success: true,
+              message: `Manager ${manager.firstName} ${manager.lastName} has no direct reports`,
+              employees: [] 
+            };
+          }
+        } catch (error) {
+          console.error(`Error retrieving employees for manager ${input.managerId}:`, error);
+          throw error;
+        }
+      } 
+      
+      // Handle employees by department
+      else if (input.department) {
+        try {
+          employees = await dataService.getEmployeesByDepartment(input.department);
+          
+          // If no employees in department, provide specific message
+          if (employees.length === 0) {
+            return { 
+              success: true,
+              message: `No employees found in department: ${input.department}`,
+              employees: [] 
+            };
+          }
+        } catch (error) {
+          console.error(`Error retrieving employees for department ${input.department}:`, error);
+          throw error;
+        }
+      } 
+      
+      // Handle all employees (with pagination)
+      else {
+        try {
+          employees = await dataService.getEmployees();
+          
+          // Check if we have any employees
+          if (employees.length === 0) {
+            throw createDataError(
+              'No employee data available',
+              AnthropicErrorCode.DATA_NOT_FOUND
+            );
+          }
+          
+          // If we have a lot of employees, set partialData flag
+          if (employees.length > 20) {
+            partialData = true;
+          }
+        } catch (error) {
+          console.error('Error retrieving all employees:', error);
+          throw error;
+        }
       }
 
+      // Apply pagination to limit the amount of data returned
       const limit = input.limit || 10;
-      return { employees: employees.slice(0, limit) };
+      const paginatedEmployees = employees.slice(0, limit);
+      
+      // If pagination reduced the number of results, indicate partial data
+      if (employees.length > limit) {
+        partialData = true;
+      }
+      
+      return { 
+        success: true,
+        employees: paginatedEmployees,
+        total: employees.length,
+        returned: paginatedEmployees.length,
+        partialData,
+        message: partialData ? `Showing ${paginatedEmployees.length} of ${employees.length} employees` : undefined
+      };
     } catch (error) {
+      // Catch any errors not handled in the specific cases above
       console.error('Error executing getEmployeeData:', error);
-      throw error;
+      
+      // If it's already a DataError, rethrow it
+      if (error.name === 'DataError') {
+        throw error;
+      }
+      
+      // Otherwise, create a new data error
+      throw createDataError(
+        `Failed to retrieve employee data: ${error.message}`,
+        AnthropicErrorCode.FUNCTION_EXECUTION_ERROR,
+        { input }
+      );
     }
   }
 
@@ -553,20 +767,93 @@ class FunctionCallingService {
    * This would normally update a database, but for the prototype we'll simulate it
    */
   private async executeCompleteTask(input: any): Promise<any> {
+    // Import error handling utilities
+    const { AnthropicErrorCode, createActionError } = (await import('../utils/errorHandling')).default;
+
     try {
+      // Validate input parameters
+      if (!input.taskId) {
+        throw createActionError(
+          'Missing required parameter: taskId',
+          'completeTask',
+          'The task ID is required to mark a task as complete',
+          true
+        );
+      }
+
       const { taskId, notes } = input;
       
-      // In a real implementation, this would update the database
-      // For our prototype, we'll return a success response
+      // In a production application, we would:
+      // 1. Look up the task in the database
+      // 2. Check if the task exists
+      // 3. Validate the user has permission to complete it
+      // 4. Update the task status
+      // 5. Log the action
+      
+      // For the prototype, validate the task ID format and simulate a success/error scenario
+      if (!taskId.match(/^[A-Z]{2}\d{4}$/)) {
+        throw createActionError(
+          `Invalid task ID format: ${taskId}`,
+          'completeTask',
+          'Task IDs must be in the format XX0000 (e.g., ET1001, TA2003)',
+          true
+        );
+      }
+      
+      // Simulate errors for certain task IDs to test error handling
+      if (taskId === 'ET9999') {
+        throw createActionError(
+          `Task ${taskId} not found`,
+          'completeTask',
+          'The specified task does not exist',
+          false // Not recoverable
+        );
+      }
+      
+      if (taskId === 'ET8888') {
+        throw createActionError(
+          `You don't have permission to complete task ${taskId}`,
+          'completeTask',
+          'Permission denied - task belongs to another user',
+          false // Not recoverable
+        );
+      }
+      
+      if (taskId === 'ET7777') {
+        throw createActionError(
+          `Task ${taskId} is already completed`,
+          'completeTask',
+          'Cannot complete a task that is already marked as complete',
+          false // Not recoverable
+        );
+      }
+      
+      // Normal success path - simulate success response
       return {
         success: true,
         taskId,
         message: `Task ${taskId} marked as complete${notes ? ` with notes: ${notes}` : ''}`,
-        completedDate: new Date().toISOString()
+        completedDate: new Date().toISOString(),
+        // Additional fields that would be present in a real implementation
+        previousStatus: 'pending',
+        newStatus: 'completed',
+        lastUpdated: new Date().toISOString()
       };
     } catch (error) {
       console.error('Error executing completeTask:', error);
-      throw error;
+      
+      // If it's already an ActionError, rethrow it
+      if (error.name === 'ActionError') {
+        throw error;
+      }
+      
+      // Otherwise, create a new action error
+      throw createActionError(
+        `Failed to complete task: ${error.message}`,
+        'completeTask',
+        error.message,
+        false // Consider general errors as not recoverable
+      );
     }
   }
 

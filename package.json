@@ -7,7 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "tune-prompts": "ts-node src/scripts/tunePrompts.ts",
+    "tune-prompts:all": "ts-node src/scripts/tunePrompts.ts all --save",
+    "tune-prompts:list": "ts-node src/scripts/tunePrompts.ts list",
+    "tune-prompts:optimize": "ts-node src/scripts/tunePrompts.ts optimize --save",
+    "tune-prompts:example": "ts-node src/examples/promptTuningExample.ts"
   },
   "keywords": [
     "chat",
@@ -33,6 +38,7 @@
     "autoprefixer": "^10.4.20",
     "eslint": "^9.21.0",
     "postcss": "^8.5.3",
+    "ts-node": "^10.9.2",
     "typescript": "^5.8.2"
   }
 }

@@ -9,6 +9,7 @@ import ContextLimitWarning from './ContextLimitWarning';
 import MessageGroup from './MessageGroup';
 import FeedbackToast, { FeedbackType } from './FeedbackToast';
 import AssistantAvatar from './AssistantAvatar';
+import ErrorBoundary from './ErrorBoundary';
 
 interface Feedback {
   message: string;
@@ -87,82 +88,106 @@ const ChatContainer: React.FC = () => {
   const messageGroups = groupMessages(messages);
   
   return (
-    <div className="flex flex-col h-full bg-white rounded-lg shadow-md overflow-hidden">
-      {/* Header */}
-      <div className="p-4 bg-white border-b flex justify-between items-center">
-        <div className="flex items-center">
-          <div className="mr-3">
-            <AssistantAvatar assistantType={activeAssistant} size="md" />
-          </div>
-          <div>
-            <h1 className="text-xl font-semibold">Unified Assistant</h1>
-            <p className="text-sm text-gray-500">
-              {activeAssistant === 'employee' 
-                ? 'Employee Assistant Mode' 
-                : activeAssistant === 'talent' 
-                  ? 'Talent Acquisition Mode' 
-                  : 'Unified Mode'}
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={clearChat}
-          className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded transition-colors duration-200"
-        >
-          Clear Chat
-        </button>
-      </div>
-      
-      {/* Messages container */}
-      <div className="flex-1 overflow-y-auto p-4 bg-gray-50 scroll-smooth">
-        {messages.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-gray-400">
-            <div className="text-center max-w-md p-6 bg-white rounded-lg shadow-sm border border-gray-100">
-              <AssistantAvatar assistantType="unified" size="lg" />
-              <h2 className="text-xl font-medium my-3">Welcome to the Unified Assistant</h2>
-              <p className="text-gray-500 mb-4">
-                I can help with both employee management and talent acquisition tasks.
-                Just ask a question to get started.
+    <ErrorBoundary>
+      <div className="flex flex-col h-full bg-white rounded-lg shadow-md overflow-hidden">
+        {/* Header */}
+        <div className="p-4 bg-white border-b flex justify-between items-center">
+          <div className="flex items-center">
+            <div className="mr-3">
+              <AssistantAvatar assistantType={activeAssistant} size="md" />
+            </div>
+            <div>
+              <h1 className="text-xl font-semibold">Unified Assistant</h1>
+              <p className="text-sm text-gray-500">
+                {activeAssistant === 'employee' 
+                  ? 'Employee Assistant Mode' 
+                  : activeAssistant === 'talent' 
+                    ? 'Talent Acquisition Mode' 
+                    : 'Unified Mode'}
               </p>
-              <div className="text-sm text-gray-400 mt-4">
-                <p>Try asking about employee schedules, tasks, or recruitment.</p>
-              </div>
             </div>
           </div>
-        ) : (
-          // Render message groups
-          messageGroups.map((group, groupIndex) => {
-            const previousGroup = groupIndex > 0 ? messageGroups[groupIndex - 1] : null;
-            const previousMessage = previousGroup ? previousGroup[previousGroup.length - 1] : null;
-            
-            return (
-              <MessageGroup 
-                key={`group-${groupIndex}`} 
-                messages={group} 
-                previousMessage={previousMessage}
-              />
-            );
-          })
+          <button
+            onClick={clearChat}
+            className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded transition-colors duration-200"
+          >
+            Clear Chat
+          </button>
+        </div>
+        
+        {/* Messages container */}
+        <div className="flex-1 overflow-y-auto p-4 bg-gray-50 scroll-smooth">
+          <ErrorBoundary fallback={
+            <div className="p-4 bg-yellow-50 rounded border border-yellow-200 mb-4">
+              <p className="text-yellow-800">
+                There was an error displaying the messages. Please try refreshing the page.
+              </p>
+              <button 
+                onClick={clearChat}
+                className="mt-2 px-3 py-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 rounded text-sm"
+              >
+                Clear Chat and Reset
+              </button>
+            </div>
+          }>
+            {messages.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-gray-400">
+                <div className="text-center max-w-md p-6 bg-white rounded-lg shadow-sm border border-gray-100">
+                  <AssistantAvatar assistantType="unified" size="lg" />
+                  <h2 className="text-xl font-medium my-3">Welcome to the Unified Assistant</h2>
+                  <p className="text-gray-500 mb-4">
+                    I can help with both employee management and talent acquisition tasks.
+                    Just ask a question to get started.
+                  </p>
+                  <div className="text-sm text-gray-400 mt-4">
+                    <p>Try asking about employee schedules, tasks, or recruitment.</p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              // Render message groups
+              messageGroups.map((group, groupIndex) => {
+                const previousGroup = groupIndex > 0 ? messageGroups[groupIndex - 1] : null;
+                const previousMessage = previousGroup ? previousGroup[previousGroup.length - 1] : null;
+                
+                return (
+                  <MessageGroup 
+                    key={`group-${groupIndex}`} 
+                    messages={group} 
+                    previousMessage={previousMessage}
+                  />
+                );
+              })
+            )}
+          </ErrorBoundary>
+          
+          {/* Show typing indicator when loading */}
+          {isLoading && <TypingIndicator assistantType={activeAssistant} />}
+          
+          <div ref={messagesEndRef} className="h-4" />
+        </div>
+        
+        {/* Input area */}
+        <ErrorBoundary fallback={
+          <div className="p-4 border-t">
+            <div className="bg-red-50 p-3 rounded border border-red-200 text-red-800 text-sm">
+              <p>There was an error with the message input. Please refresh the page.</p>
+            </div>
+          </div>
+        }>
+          <MessageInput />
+        </ErrorBoundary>
+        
+        {/* Feedback toast */}
+        {feedback && (
+          <FeedbackToast 
+            message={feedback.message} 
+            type={feedback.type} 
+            onClose={handleFeedbackClose}
+          />
         )}
-        
-        {/* Show typing indicator when loading */}
-        {isLoading && <TypingIndicator assistantType={activeAssistant} />}
-        
-        <div ref={messagesEndRef} className="h-4" />
       </div>
-      
-      {/* Input area */}
-      <MessageInput />
-      
-      {/* Feedback toast */}
-      {feedback && (
-        <FeedbackToast 
-          message={feedback.message} 
-          type={feedback.type} 
-          onClose={handleFeedbackClose}
-        />
-      )}
-    </div>
+    </ErrorBoundary>
   );
 };
 
