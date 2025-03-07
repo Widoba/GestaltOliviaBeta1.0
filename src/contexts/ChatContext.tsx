@@ -45,8 +45,8 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   // Load relevant data based on the user's message
   const loadRelevantData = async (content: string) => {
     try {
-      const relevantData = await dataLoaderService.loadDataForQuery(content);
-      return dataLoaderService.formatDataForPrompt(relevantData);
+      const promptInjectionService = (await import('../services/promptInjectionService')).default;
+      return promptInjectionService.prepareDataForPrompt(content);
     } catch (error) {
       console.error('Error loading relevant data:', error);
       return '';
@@ -56,20 +56,12 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   // Determine which assistant should handle the request
   const determineAssistantType = async (content: string): Promise<AssistantType> => {
     try {
-      // Load relevant data
-      const relevantData = await dataLoaderService.loadDataForQuery(content);
+      // Use query analysis service to determine intent and assistant type
+      const queryAnalysisService = (await import('../services/queryAnalysisService')).default;
+      const analysis = await queryAnalysisService.analyzeQuery(content);
       
-      // Classify the query domain
-      const classification = dataLoaderService.classifyQueryDomain(content, relevantData);
-      
-      // Determine assistant type based on classification scores
-      if (classification.employeeAssistance > 0.7) {
-        return 'employee';
-      } else if (classification.talentAcquisition > 0.7) {
-        return 'talent';
-      } else {
-        return 'unified';
-      }
+      // Return the determined assistant type
+      return analysis.assistantType;
     } catch (error) {
       console.error('Error determining assistant type:', error);
       return 'unified'; // Default to unified if there's an error
