@@ -95,6 +95,15 @@ Advanced performance features including:
 - **Batched data fetching** to reduce redundant API calls and database queries
 - **Prompt size optimization** to reduce token usage while preserving functionality
 
+### User Flow Testing
+Comprehensive testing framework for validating assistant behavior:
+
+- **End-to-end conversation testing** with multi-turn scenarios
+- **Assistant transition validation** to ensure proper switching between contexts
+- **Data accuracy verification** to confirm responses contain correct information
+- **Context preservation testing** to validate entity memory across transitions
+- **Performance metrics collection** for measuring key indicators
+
 ## Documentation
 
 ### Performance Optimization
@@ -102,6 +111,9 @@ See [Performance Optimization Documentation](src/services/README_PERFORMANCE.md)
 
 ### Prompt Tuning
 See [Prompt Tuning Documentation](src/services/promptTuning/README.md) for details on the prompt testing and optimization framework.
+
+### User Flow Testing
+See [User Flow Testing Documentation](src/utils/userFlowTesting/README.md) for details on the conversation testing framework and test scenarios.
 
 ### Development Summary
 The [DEVELOPMENT_SUMMARY.md](DEVELOPMENT_SUMMARY.md) file contains a comprehensive overview of the project's implementation details, including data structures, system architecture, and technical decisions.
@@ -116,6 +128,21 @@ npm run dev
 ### Prompt Tuning
 ```
 npm run tune-prompts
+npm run tune-prompts:all      # Run all prompt tests
+npm run tune-prompts:list     # List prompt variations
+npm run tune-prompts:optimize # Generate optimized prompts
+```
+
+### User Flow Testing
+```
+npm run test-flows
+npm run test-flows:all        # Run all conversation flow tests
+npm run test-flows:employee   # Test employee assistant flows
+npm run test-flows:talent     # Test talent acquisition flows
+npm run test-flows:transition # Test assistant transitions
+npm run test-flows:end-to-end # Test complete user journeys
+npm run test-flows:list       # List available test flows
+npm run test-flows:report     # View latest test report
 ```
 
 ### Viewing Performance Metrics

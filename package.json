@@ -12,7 +12,15 @@
     "tune-prompts:all": "ts-node src/scripts/tunePrompts.ts all --save",
     "tune-prompts:list": "ts-node src/scripts/tunePrompts.ts list",
     "tune-prompts:optimize": "ts-node src/scripts/tunePrompts.ts optimize --save",
-    "tune-prompts:example": "ts-node src/examples/promptTuningExample.ts"
+    "tune-prompts:example": "ts-node src/examples/promptTuningExample.ts",
+    "test-flows": "ts-node src/scripts/testUserFlows.ts",
+    "test-flows:all": "ts-node src/scripts/testUserFlows.ts all --save",
+    "test-flows:employee": "ts-node src/scripts/testUserFlows.ts category employee --save",
+    "test-flows:talent": "ts-node src/scripts/testUserFlows.ts category talent --save",
+    "test-flows:transition": "ts-node src/scripts/testUserFlows.ts category transition --save",
+    "test-flows:end-to-end": "ts-node src/scripts/testUserFlows.ts category end-to-end --save",
+    "test-flows:list": "ts-node src/scripts/testUserFlows.ts list",
+    "test-flows:report": "ts-node src/scripts/testUserFlows.ts report"
   },
   "keywords": [
     "chat",
