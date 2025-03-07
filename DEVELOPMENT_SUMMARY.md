@@ -420,6 +420,132 @@ Each query you receive will be routed to the appropriate assistant personality b
 `;
 ```
 
+### Prompt Tuning Framework
+
+#### Core Functionality
+Provides a comprehensive framework for testing, evaluating, and optimizing system prompts to improve intent classification accuracy, assistant switching, transition handling, and context preservation.
+
+#### File Locations
+
+- `/src/utils/promptTesting/promptTestingFramework.ts` - Core testing framework and metrics
+- `/src/utils/promptTesting/testCases.ts` - Standardized test cases for evaluation
+- `/src/services/promptTuning/promptVariationManager.ts` - Manages prompt variations
+- `/src/services/promptTuning/promptTuningService.ts` - Service for testing and optimization
+- `/src/scripts/tunePrompts.ts` - CLI tool for prompt tuning
+- `/src/examples/promptTuningExample.ts` - Example usage of the framework
+- `/src/utils/promptTesting/README.md` - Framework documentation
+- `/src/services/promptTuning/README.md` - Implementation documentation
+
+#### Key Methods/Functions
+
+- `runPromptTests(promptName, promptContent, testCases)`: Tests a prompt variation against standardized cases
+- `comparePromptVariations(baseline, test)`: Compares performance between prompt variations
+- `createVariation(name, description, basePrompt, employeePrompt, talentPrompt, changes)`: Creates a new prompt variation
+- `runAllTests()`: Executes tests for all available prompt variations
+- `createOptimizedPrompt()`: Combines the best aspects of different variations into an optimized prompt
+
+#### Dependencies
+
+- Uses the query analysis service for intent detection and classification
+- Integrates with existing prompt utilities for prompt management
+- Depends on the base prompts as the foundation for variations
+
+#### Key Implementation Details
+
+The framework includes several key components:
+
+```typescript
+// From promptTestingFramework.ts
+// Interface for test cases
+export interface PromptTestCase {
+  id: string;
+  query: string;
+  expectedAssistantType: AssistantType;
+  expectedIntent: IntentCategory;
+  description: string;
+  category: 'basic' | 'edge' | 'ambiguous' | 'context-dependent';
+  tags: string[];
+}
+
+// Metrics for prompt performance
+export interface PromptPerformanceMetrics {
+  intentAccuracy: number;
+  assistantTypeAccuracy: number;
+  responseQuality: number;
+  transitionSmoothnessScore: number;
+  contextPreservationScore: number;
+  overallScore: number;
+}
+```
+
+The prompt variation manager creates specialized variations:
+
+```typescript
+// From promptVariationManager.ts
+private createEnhancedIntentClassificationVariation(): PromptVariation {
+  // Define changes for enhanced intent classification
+  const changes = [
+    'Added more examples for each intent category',
+    'Expanded intent classification heuristics with confidence thresholds',
+    'Added handling for overlapping intents',
+    'Improved rules for ambiguous queries'
+  ];
+  
+  // Create enhanced base prompt with improved intent classification
+  const enhancedBasePrompt = baseSystemPrompt.replace(
+    '### Classification Heuristics:',
+    `### Classification Heuristics:
+
+- For queries mentioning both employee and candidate/job topics, weigh entities by their significance in the query.
+- Prioritize specific named entities over general terms when determining intent.
+- For ambiguous queries with low confidence (<0.6) in any category, default to maintaining the current assistant rather than switching.
+- Consider the centrality of terms in the query - terms mentioned in the beginning or as the subject carry more weight.
+- When confidence scores for competing intents are within 0.2 of each other, consider it a mixed intent and maintain current context.`
+  );
+  
+  // Create variation
+  return this.createVariation(
+    'Enhanced Intent Classification',
+    'Improved intent classification rules and handling of ambiguous queries',
+    enhancedBasePrompt,
+    employeeAssistantPrompt,
+    talentAssistantPrompt,
+    changes
+  );
+}
+```
+
+The prompt tuning service can combine the best aspects of different variations:
+
+```typescript
+// From promptTuningService.ts
+async createOptimizedPrompt(): Promise<PromptVariation> {
+  // Run all tests to ensure we have metrics
+  await this.runAllTests();
+  
+  // Get the best variation for each key metric
+  const bestForIntentAccuracy = await this.getBestVariation('intentAccuracy');
+  const bestForAssistantTypeAccuracy = await this.getBestVariation('assistantTypeAccuracy');
+  const bestForTransitions = await this.getBestVariation('transitionSmoothnessScore');
+  const bestForContextPreservation = await this.getBestVariation('contextPreservationScore');
+  
+  // Build optimized prompt by combining the best sections from each variation
+  let optimizedBasePrompt = promptVariationManager.getBaseline().basePrompt;
+  
+  // Extract and combine sections from the best-performing variations
+  // [Implementation details for extracting and combining sections]
+  
+  return promptVariationManager.createVariation(
+    'Optimized Combined Prompt',
+    'Combined prompt taking the best aspects from all variations',
+    optimizedBasePrompt,
+    promptVariationManager.getBaseline().employeePrompt,
+    promptVariationManager.getBaseline().talentPrompt,
+    changes
+  );
+}
+```
+
 ### Context Window Management
 
 #### Core Functionality
@@ -1099,22 +1225,21 @@ We have successfully implemented:
 - Implemented UI-level error handling with React ErrorBoundary components
 - Added data retrieval error handling with partial data support
 
+#### Prompt Tuning:
+
+- Created a comprehensive prompt testing framework with standardized test cases
+- Developed metrics for measuring prompt performance (intent accuracy, assistant type accuracy, etc.)
+- Built a system for creating and managing prompt variations
+- Implemented a prompt tuning service for comparing variations and creating optimized prompts
+- Developed a CLI tool for running tests, comparing results, and generating reports
+- Enhanced intent classification with better heuristics
+- Improved transition handling with more natural phrases
+- Added context preservation guidelines and entity tracking
+
 ### Current Phase
-We are currently in Phase 4: Quality Assurance & Optimization, specifically ready to begin Step 1 (Prompt Tuning).
+We are currently in Phase 4: Quality Assurance & Optimization, and have completed Step 2 (Performance Optimization). We are now preparing to move to Step 3 (User Flow Testing).
 
 ### Remaining Tasks
-
-#### Prompt Tuning (Phase 4, Step 1):
-
-- Test system prompt with various user inquiries
-- Refine prompt based on response quality
-- Optimize for minimal assistant switching
-
-#### Performance Optimization (Phase 4, Step 2):
-
-- Implement caching for frequently accessed data
-- Create batched data fetching to reduce API calls
-- Optimize prompt size to reduce token usage
 
 #### User Flow Testing (Phase 4, Step 3):
 
@@ -1125,6 +1250,30 @@ We are currently in Phase 4: Quality Assurance & Optimization, specifically read
 ## Technical Implementation Details
 
 ### Key Technical Decisions
+
+#### Performance Optimization
+
+We've implemented several performance optimization strategies to improve responsiveness and efficiency:
+
+1. **Advanced Caching System** 
+   - Category-based caching with different TTLs based on data volatility
+   - LRU (Least Recently Used) eviction when cache exceeds size limits
+   - Memory-efficient storage with automatic cache maintenance
+   - Cache statistics for monitoring performance
+
+2. **Batched Data Fetching**
+   - Request batching to combine similar data requests within a time window
+   - Parallel data loading for different data types
+   - Preloading of commonly accessed data
+   - Efficient relationship resolution
+
+3. **Prompt Size Optimization**
+   - Dynamic prompt trimming based on query complexity
+   - Selective inclusion of relevant data with priority-based filtering
+   - Configurable compression levels (low, medium, high)
+   - Token usage tracking and savings metrics
+
+These optimizations significantly reduce API calls, minimize token usage, and improve overall responsiveness of the system.
 
 #### Message Optimizations for Context Window:
 We implemented a sophisticated token budget system that allocates tokens between:
@@ -1242,9 +1391,36 @@ We developed a multi-layered error handling approach:
 - We allow Claude to determine which functions to call rather than hardcoding function calls for specific intents.
 - Trade-off: More flexibility and natural interactions, but occasionally less predictable behavior requiring additional prompt tuning.
 
+#### Caching Strategy:
+
+- Implemented a sophisticated category-based caching system with LRU eviction and TTL expiration.
+- Trade-off: Slightly increased memory usage for significantly improved response times.
+
+#### Data Batching:
+
+- Implemented request batching for related data fetches to reduce redundant API/database calls.
+- Trade-off: Small potential increase in latency for initial requests in a batch window in exchange for overall throughput improvement.
+
+#### Prompt Optimization:
+
+- Implemented dynamic prompt optimization with configurable compression levels.
+- Trade-off: Slight risk of information loss with higher compression levels in exchange for token savings.
+
+#### Prompt Testing Approach:
+
+- We implemented a testing-based approach to prompt optimization rather than relying solely on manual adjustments.
+- Trade-off: More systematic improvement but requires significant test case development and maintenance.
+
+#### Prompt Variation Strategy:
+
+- We created focused variations targeting specific aspects rather than entirely different prompt approaches.
+- Trade-off: More incremental improvements but easier to identify which changes are effective.
+
 ## Conclusion
-The Unified Assistant Prototype has successfully implemented a seamless chat experience that intelligently routes between an Employee Assistant and a Talent Acquisition Assistant. The system uses sophisticated prompt engineering, context management, data injection, function calling, and error handling to provide accurate, contextually relevant responses while maintaining a cohesive conversation flow.
+The Unified Assistant Prototype has successfully implemented a seamless chat experience that intelligently routes between an Employee Assistant and a Talent Acquisition Assistant. The system uses sophisticated prompt engineering, context management, data injection, function calling, error handling, and prompt tuning to provide accurate, contextually relevant responses while maintaining a cohesive conversation flow.
 
-As development continues, the focus will shift to tuning the prompts, optimizing performance, and conducting thorough user flow testing. The modular architecture we've established provides a solid foundation for these future improvements, with enhanced responses and robust error handling already in place.
+The project has progressed through several phases, from initial setup and core functionality to enhanced responses, error handling, and now prompt tuning. The comprehensive prompt testing framework will allow us to continually improve the system's accuracy and responsiveness, while the upcoming performance optimization and user flow testing will ensure a robust user experience.
 
-This development summary was created on March 7, 2025, and represents the project state as of that date.
+With all major components now in place, the modular architecture we've established provides a solid foundation for fine-tuning and optimization as we move toward the final stages of development.
+
+This development summary was updated on March 8, 2025, and represents the project state as of that date.
