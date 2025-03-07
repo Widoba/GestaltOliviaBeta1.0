@@ -1,0 +1,44 @@
+[
+    {
+      "task_id": "TA4001",
+      "source_system": "talent",
+      "task_type": "interview",
+      "title": "Review candidate profile",
+      "description": "Review Jordan Williams' profile before scheduled interview",
+      "candidate_id": "C1003",
+      "assigned_to": "E2001",
+      "due_date": "2025-03-11",
+      "priority": "medium",
+      "status": "pending",
+      "url": "/talent/tasks/TA4001",
+      "completion_type": "review"
+    },
+    {
+      "task_id": "TA4002",
+      "source_system": "talent",
+      "task_type": "interview",
+      "title": "Conduct interview with Jordan Williams",
+      "description": "Inventory Specialist position interview",
+      "candidate_id": "C1003",
+      "assigned_to": "E2001",
+      "due_date": "2025-03-12",
+      "priority": "high",
+      "status": "scheduled",
+      "url": "/talent/tasks/TA4002",
+      "completion_type": "interview"
+    },
+    {
+      "task_id": "TA4003",
+      "source_system": "talent",
+      "task_type": "decision",
+      "title": "Provide feedback on Taylor Smith",
+      "description": "Submit your hiring recommendation for the Assistant Store Manager candidate",
+      "candidate_id": "C1002",
+      "assigned_to": "E2001",
+      "due_date": "2025-03-09",
+      "priority": "high",
+      "status": "pending",
+      "url": "/talent/tasks/TA4003",
+      "completion_type": "form"
+    }
+  ]

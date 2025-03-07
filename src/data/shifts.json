@@ -1,0 +1,291 @@
+{
+  "shifts": [
+    {
+      "id": "S001",
+      "employeeId": "E001",
+      "startDate": "2024-03-04",
+      "endDate": "2024-03-08",
+      "schedule": [
+        {
+          "day": "Monday",
+          "startTime": "09:00",
+          "endTime": "17:00",
+          "breakTime": "12:00-13:00"
+        },
+        {
+          "day": "Tuesday",
+          "startTime": "09:00",
+          "endTime": "17:00",
+          "breakTime": "12:00-13:00"
+        },
+        {
+          "day": "Wednesday",
+          "startTime": "09:00",
+          "endTime": "17:00",
+          "breakTime": "12:00-13:00"
+        },
+        {
+          "day": "Thursday",
+          "startTime": "09:00",
+          "endTime": "17:00",
+          "breakTime": "12:00-13:00"
+        },
+        {
+          "day": "Friday",
+          "startTime": "09:00",
+          "endTime": "17:00",
+          "breakTime": "12:00-13:00"
+        }
+      ],
+      "type": "regular",
+      "status": "completed",
+      "location": "remote"
+    },
+    {
+      "id": "S002",
+      "employeeId": "E002",
+      "startDate": "2024-03-04",
+      "endDate": "2024-03-08",
+      "schedule": [
+        {
+          "day": "Monday",
+          "startTime": "10:00",
+          "endTime": "18:00",
+          "breakTime": "13:00-14:00"
+        },
+        {
+          "day": "Tuesday",
+          "startTime": "10:00",
+          "endTime": "18:00",
+          "breakTime": "13:00-14:00"
+        },
+        {
+          "day": "Wednesday",
+          "startTime": "10:00",
+          "endTime": "18:00",
+          "breakTime": "13:00-14:00"
+        },
+        {
+          "day": "Thursday",
+          "startTime": "10:00",
+          "endTime": "18:00",
+          "breakTime": "13:00-14:00"
+        },
+        {
+          "day": "Friday",
+          "startTime": "10:00",
+          "endTime": "18:00",
+          "breakTime": "13:00-14:00"
+        }
+      ],
+      "type": "regular",
+      "status": "completed",
+      "location": "office"
+    },
+    {
+      "id": "S003",
+      "employeeId": "E003",
+      "startDate": "2024-03-04",
+      "endDate": "2024-03-08",
+      "schedule": [
+        {
+          "day": "Monday",
+          "startTime": "08:00",
+          "endTime": "16:00",
+          "breakTime": "12:00-13:00"
+        },
+        {
+          "day": "Tuesday",
+          "startTime": "08:00",
+          "endTime": "16:00",
+          "breakTime": "12:00-13:00"
+        },
+        {
+          "day": "Wednesday",
+          "startTime": "08:00",
+          "endTime": "16:00",
+          "breakTime": "12:00-13:00"
+        },
+        {
+          "day": "Thursday",
+          "startTime": "08:00",
+          "endTime": "16:00",
+          "breakTime": "12:00-13:00"
+        },
+        {
+          "day": "Friday",
+          "startTime": "08:00",
+          "endTime": "16:00",
+          "breakTime": "12:00-13:00"
+        }
+      ],
+      "type": "regular",
+      "status": "completed",
+      "location": "office"
+    },
+    {
+      "id": "S004",
+      "employeeId": "E001",
+      "startDate": "2024-03-11",
+      "endDate": "2024-03-15",
+      "schedule": [
+        {
+          "day": "Monday",
+          "startTime": "09:00",
+          "endTime": "17:00",
+          "breakTime": "12:00-13:00"
+        },
+        {
+          "day": "Tuesday",
+          "startTime": "09:00",
+          "endTime": "17:00",
+          "breakTime": "12:00-13:00"
+        },
+        {
+          "day": "Wednesday",
+          "startTime": "09:00",
+          "endTime": "17:00",
+          "breakTime": "12:00-13:00"
+        },
+        {
+          "day": "Thursday",
+          "startTime": "09:00",
+          "endTime": "17:00",
+          "breakTime": "12:00-13:00"
+        },
+        {
+          "day": "Friday",
+          "startTime": "09:00",
+          "endTime": "17:00",
+          "breakTime": "12:00-13:00"
+        }
+      ],
+      "type": "regular",
+      "status": "approved",
+      "location": "remote"
+    },
+    {
+      "id": "S005",
+      "employeeId": "E004",
+      "startDate": "2024-03-11",
+      "endDate": "2024-03-15",
+      "schedule": [
+        {
+          "day": "Monday",
+          "startTime": "09:00",
+          "endTime": "17:00",
+          "breakTime": "12:00-13:00"
+        },
+        {
+          "day": "Tuesday",
+          "startTime": "09:00",
+          "endTime": "17:00",
+          "breakTime": "12:00-13:00"
+        },
+        {
+          "day": "Wednesday",
+          "startTime": "PTO",
+          "endTime": "PTO",
+          "breakTime": "N/A"
+        },
+        {
+          "day": "Thursday",
+          "startTime": "PTO",
+          "endTime": "PTO",
+          "breakTime": "N/A"
+        },
+        {
+          "day": "Friday",
+          "startTime": "09:00",
+          "endTime": "17:00",
+          "breakTime": "12:00-13:00"
+        }
+      ],
+      "type": "mixed",
+      "status": "approved",
+      "location": "office"
+    },
+    {
+      "id": "S006",
+      "employeeId": "E006",
+      "startDate": "2024-03-11",
+      "endDate": "2024-03-15",
+      "schedule": [
+        {
+          "day": "Monday",
+          "startTime": "12:00",
+          "endTime": "20:00",
+          "breakTime": "16:00-17:00"
+        },
+        {
+          "day": "Tuesday",
+          "startTime": "12:00",
+          "endTime": "20:00",
+          "breakTime": "16:00-17:00"
+        },
+        {
+          "day": "Wednesday",
+          "startTime": "12:00",
+          "endTime": "20:00",
+          "breakTime": "16:00-17:00"
+        },
+        {
+          "day": "Thursday",
+          "startTime": "12:00",
+          "endTime": "20:00",
+          "breakTime": "16:00-17:00"
+        },
+        {
+          "day": "Friday",
+          "startTime": "12:00",
+          "endTime": "20:00",
+          "breakTime": "16:00-17:00"
+        }
+      ],
+      "type": "evening",
+      "status": "approved",
+      "location": "remote"
+    },
+    {
+      "id": "S007",
+      "employeeId": "E003",
+      "startDate": "2024-03-18",
+      "endDate": "2024-03-22",
+      "schedule": [
+        {
+          "day": "Monday",
+          "startTime": "09:00",
+          "endTime": "17:00",
+          "breakTime": "12:00-13:00"
+        },
+        {
+          "day": "Tuesday",
+          "startTime": "09:00",
+          "endTime": "17:00",
+          "breakTime": "12:00-13:00"
+        },
+        {
+          "day": "Wednesday",
+          "startTime": "09:00",
+          "endTime": "17:00",
+          "breakTime": "12:00-13:00"
+        },
+        {
+          "day": "Thursday",
+          "startTime": "training",
+          "endTime": "training",
+          "breakTime": "N/A"
+        },
+        {
+          "day": "Friday",
+          "startTime": "training",
+          "endTime": "training",
+          "breakTime": "N/A"
+        }
+      ],
+      "type": "mixed",
+      "status": "requested",
+      "location": "mixed"
+    }
+  ]
+}

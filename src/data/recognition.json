@@ -1,0 +1,121 @@
+{
+  "recognition": [
+    {
+      "id": "R001",
+      "type": "peer_recognition",
+      "employeeId": "E001",
+      "recognizedBy": "E003",
+      "date": "2024-02-15",
+      "description": "John went above and beyond to help me solve a complex client issue. His technical expertise and willingness to collaborate made a big difference.",
+      "category": "teamwork",
+      "visibility": "public",
+      "points": 50,
+      "tags": ["collaboration", "technical_excellence", "problem_solving"]
+    },
+    {
+      "id": "R002",
+      "type": "manager_recognition",
+      "employeeId": "E001",
+      "recognizedBy": "E005",
+      "date": "2024-02-28",
+      "description": "John demonstrated exceptional leadership on the database migration project. He proactively identified potential issues and implemented solutions that saved the team significant time and effort.",
+      "category": "leadership",
+      "visibility": "public",
+      "points": 100,
+      "tags": ["leadership", "initiative", "technical_excellence"]
+    },
+    {
+      "id": "R003",
+      "type": "milestone",
+      "employeeId": "E009",
+      "date": "2024-02-01",
+      "description": "Celebrating 10 years of outstanding service and leadership at our company!",
+      "category": "service_anniversary",
+      "visibility": "public",
+      "gift": "Service Award Plaque and $500 Gift Card",
+      "tags": ["anniversary", "leadership", "dedication"]
+    },
+    {
+      "id": "R004",
+      "type": "peer_recognition",
+      "employeeId": "E006",
+      "recognizedBy": "E002",
+      "date": "2024-03-01",
+      "description": "Olivia provided exceptional support during our marketing campaign launch. Her quick responses and technical assistance were invaluable.",
+      "category": "customer_focus",
+      "visibility": "public",
+      "points": 50,
+      "tags": ["customer_service", "responsiveness", "technical_support"]
+    },
+    {
+      "id": "R005",
+      "type": "team_award",
+      "teamId": "T001",
+      "teamName": "Frontend Development Team",
+      "members": ["E001", "E014", "E015", "E020"],
+      "date": "2024-02-20",
+      "description": "Recognized for exceptional work on the new user interface redesign. The team delivered high-quality work ahead of schedule, receiving excellent feedback from users.",
+      "category": "project_success",
+      "visibility": "public",
+      "award": "Team Excellence Award and Team Lunch",
+      "tags": ["teamwork", "quality", "user_experience"]
+    },
+    {
+      "id": "R006",
+      "type": "external_award",
+      "employeeId": "E007",
+      "date": "2024-01-15",
+      "description": "William received the Industry Marketer of the Year award for his innovative approach to our product launch campaign.",
+      "category": "industry_recognition",
+      "visibility": "public",
+      "awardingOrganization": "Marketing Excellence Association",
+      "tags": ["marketing", "innovation", "industry_recognition"]
+    },
+    {
+      "id": "R007",
+      "type": "certification",
+      "employeeId": "E004",
+      "date": "2024-02-25",
+      "description": "Sophia completed the Professional in Human Resources (PHR) certification, demonstrating her commitment to professional development and HR excellence.",
+      "category": "professional_development",
+      "visibility": "public",
+      "certificationName": "Professional in Human Resources (PHR)",
+      "tags": ["certification", "hr", "professional_development"]
+    },
+    {
+      "id": "R008",
+      "type": "customer_feedback",
+      "employeeId": "E003",
+      "date": "2024-03-03",
+      "description": "A key client specifically mentioned Michael's exceptional service and problem-solving approach that helped them solve a critical business issue.",
+      "category": "customer_success",
+      "visibility": "public",
+      "customerName": "ABC Corporation",
+      "tags": ["customer_service", "problem_solving", "sales_excellence"]
+    },
+    {
+      "id": "R009",
+      "type": "innovation",
+      "employeeId": "E001",
+      "recognizedBy": "E005",
+      "date": "2024-02-10",
+      "description": "John developed an innovative solution to our cloud architecture challenges that resulted in a 30% improvement in system performance and significant cost savings.",
+      "category": "technical_innovation",
+      "visibility": "public",
+      "points": 150,
+      "tags": ["innovation", "technical_excellence", "cost_saving"]
+    },
+    {
+      "id": "R010",
+      "type": "values_champion",
+      "employeeId": "E002",
+      "recognizedBy": "E007",
+      "date": "2024-01-20",
+      "description": "Emma consistently exemplifies our company values, particularly in her collaborative approach and commitment to excellence in all her work.",
+      "category": "company_values",
+      "visibility": "public",
+      "points": 100,
+      "tags": ["values", "collaboration", "excellence"]
+    }
+  ]
+}

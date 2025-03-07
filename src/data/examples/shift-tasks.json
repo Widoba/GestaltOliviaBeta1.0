@@ -1,0 +1,17 @@
+[
+    {
+      "task_id": "SM4001",
+      "source_system": "scheduling",
+      "task_type": "approve_swap",
+      "title": "Review Devon's shift swap request",
+      "description": "Devon has requested to swap their March 8th shift",
+      "related_employee": "E2002",
+      "related_shift": "S3004",
+      "assigned_to": "E2001",
+      "due_date": "2025-03-07",
+      "priority": "high",
+      "status": "pending",
+      "url": "/scheduling/tasks/SM4001",
+      "completion_type": "approval"
+    }
+  ]

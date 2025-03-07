@@ -1,0 +1,18 @@
+[
+    {
+      "job_req_id": "JR-12345",
+      "internal_job_req_id": "INT-12345",
+      "job_title": "Senior Sales Associate",
+      "job_location": "Chicago Downtown",
+      "job_status": true,
+      "brand": "lunchbag"
+    },
+    {
+      "job_req_id": "JR-12346",
+      "internal_job_req_id": "INT-12346",
+      "job_title": "Assistant Store Manager",
+      "job_location": "Chicago Downtown",
+      "job_status": true,
+      "brand": "lunchbag"
+    }
+  ]

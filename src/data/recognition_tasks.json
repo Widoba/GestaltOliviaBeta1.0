@@ -1,0 +1,132 @@
+{
+  "recognition_tasks": [
+    {
+      "id": "RT001",
+      "managerId": "E005",
+      "taskType": "peer_recognition",
+      "title": "Submit Monthly Team Recognition",
+      "description": "Nominate team members for monthly recognition program",
+      "status": "pending",
+      "dueDate": "2024-03-10",
+      "priority": "medium",
+      "departmentId": "D001",
+      "relatedItems": ["recognition-form", "team-achievements"],
+      "notes": "Consider contributions to the recent product launch"
+    },
+    {
+      "id": "RT002",
+      "managerId": "E007",
+      "taskType": "team_award",
+      "title": "Submit Marketing Campaign Award Nomination",
+      "description": "Complete nomination for industry award for recent marketing campaign",
+      "status": "in_progress",
+      "dueDate": "2024-03-15",
+      "priority": "high",
+      "departmentId": "D002",
+      "relatedItems": ["award-criteria", "campaign-results", "team-contributions"],
+      "notes": "Deadline for industry award submission is March 17"
+    },
+    {
+      "id": "RT003",
+      "managerId": "E008",
+      "taskType": "performance_recognition",
+      "title": "Quarterly Sales Achievement Recognition",
+      "description": "Identify and recognize top sales performers for Q1",
+      "status": "pending",
+      "dueDate": "2024-04-05",
+      "priority": "medium",
+      "departmentId": "D003",
+      "relatedItems": ["sales-data", "recognition-template", "reward-options"],
+      "notes": "Select top performers based on both revenue and customer satisfaction metrics"
+    },
+    {
+      "id": "RT004",
+      "managerId": "E009",
+      "taskType": "service_anniversary",
+      "title": "Prepare Service Anniversary Recognitions",
+      "description": "Prepare recognition materials for employees celebrating service anniversaries in April",
+      "status": "not_started",
+      "dueDate": "2024-03-25",
+      "priority": "low",
+      "relatedItems": ["anniversary-list", "gift-options", "certificate-template"],
+      "notes": "Five employees reaching milestone anniversaries in April"
+    },
+    {
+      "id": "RT005",
+      "managerId": "E005",
+      "taskType": "innovation_award",
+      "title": "Innovation Award Nomination",
+      "description": "Submit nomination for company innovation award",
+      "status": "completed",
+      "dueDate": "2024-03-01",
+      "completedDate": "2024-02-28",
+      "priority": "medium",
+      "departmentId": "D001",
+      "relatedItems": ["nomination-form", "project-description", "innovation-impact"],
+      "notes": "Nominated the team for their work on the new cloud architecture"
+    },
+    {
+      "id": "RT006",
+      "managerId": "E011",
+      "taskType": "customer_feedback",
+      "title": "Recognize Team for Positive Customer Feedback",
+      "description": "Share and recognize team members mentioned in recent positive customer feedback",
+      "status": "pending",
+      "dueDate": "2024-03-12",
+      "priority": "medium",
+      "departmentId": "D005",
+      "relatedItems": ["customer-feedback", "team-roster", "recognition-options"],
+      "notes": "Three team members were specifically mentioned by customers this month"
+    },
+    {
+      "id": "RT007",
+      "managerId": "E010",
+      "taskType": "company_values",
+      "title": "Values Champion Recognition",
+      "description": "Nominate employees who exemplify company values for quarterly recognition",
+      "status": "in_progress",
+      "dueDate": "2024-03-20",
+      "priority": "medium",
+      "relatedItems": ["company-values", "nomination-form", "selection-criteria"],
+      "notes": "Looking for nominees who demonstrate all core values consistently"
+    },
+    {
+      "id": "RT008",
+      "managerId": "E005",
+      "taskType": "project_completion",
+      "title": "Project Completion Recognition",
+      "description": "Recognize team members for successful completion of the database migration project",
+      "status": "pending",
+      "dueDate": "2024-03-18",
+      "priority": "medium",
+      "departmentId": "D001",
+      "relatedItems": ["project-summary", "team-contributions", "recognition-options"],
+      "notes": "Project was completed ahead of schedule and under budget"
+    },
+    {
+      "id": "RT009",
+      "managerId": "E008",
+      "taskType": "mentor_recognition",
+      "title": "Recognize Outstanding Mentors",
+      "description": "Identify and recognize team members who have excelled as mentors",
+      "status": "not_started",
+      "dueDate": "2024-03-30",
+      "priority": "low",
+      "departmentId": "D003",
+      "relatedItems": ["mentor-program", "feedback-data", "recognition-template"],
+      "notes": "Focus on mentors who have helped new hires ramp up quickly"
+    },
+    {
+      "id": "RT010",
+      "managerId": "E009",
+      "taskType": "training_achievement",
+      "title": "Recognize Training Completion Achievements",
+      "description": "Recognize employees who completed additional professional certifications this quarter",
+      "status": "in_progress",
+      "dueDate": "2024-03-28",
+      "priority": "low",
+      "relatedItems": ["training-records", "certification-list", "recognition-template"],
+      "notes": "Several employees have completed advanced certifications on their own time"
+    }
+  ]
+}

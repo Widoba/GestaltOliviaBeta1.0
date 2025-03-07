@@ -1,0 +1,28 @@
+[
+    {
+      "employee_id": "E2001",
+      "employee_first_name": "Sam",
+      "employee_last_name": "Rodriguez",
+      "employee_email": "sam.rodriguez@lunchbag.com",
+      "employee_phone_number": "312-555-1001",
+      "employee_department": "Retail Operations",
+      "employee_role": "Store Manager",
+      "employee_position_title": "Downtown Store Manager",
+      "employee_location": "Chicago Downtown",
+      "manager": "E2004",
+      "direct_reports": ["E2002", "E2003", "E2005"]
+    },
+    {
+      "employee_id": "E2002",
+      "employee_first_name": "Devon",
+      "employee_last_name": "Clark",
+      "employee_email": "devon.clark@lunchbag.com",
+      "employee_phone_number": "312-555-1002",
+      "employee_department": "Retail",
+      "employee_role": "Sales Associate",
+      "employee_position_title": "Senior Sales Associate",
+      "employee_location": "Chicago Downtown",
+      "manager": "E2001",
+      "direct_reports": []
+    }
+  ]

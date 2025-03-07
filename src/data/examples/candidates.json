@@ -1,0 +1,29 @@
+[
+    {
+      "candidate_id": "C1001",
+      "first_name": "Alex",
+      "last_name": "Johnson",
+      "job_title": "Senior Sales Associate",
+      "email": "alex.johnson@email.com",
+      "job_req_id": "JR-12345",
+      "job_location": "Chicago Downtown",
+      "phone_number": "312-555-0101",
+      "journey_status": "scheduling",
+      "journey_status_detail": "interview_scheduled",
+      "interview_date": "2025-03-10T14:00:00",
+      "manager_notes": "Strong retail background, 5+ years experience"
+    },
+    {
+      "candidate_id": "C1003",
+      "first_name": "Jordan",
+      "last_name": "Williams",
+      "job_title": "Inventory Specialist",
+      "email": "jordan.williams@email.com",
+      "job_req_id": "JR-12347",
+      "job_location": "Chicago North",
+      "phone_number": "312-555-0103",
+      "journey_status": "application",
+      "journey_status_detail": "application_complete",
+      "manager_notes": "Strong attention to detail, needs phone screening"
+    }
+  ]

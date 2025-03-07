@@ -1,0 +1,15 @@
+[
+    {
+      "task_id": "RE4001",
+      "source_system": "recognition",
+      "task_type": "monthly_recognition",
+      "title": "Recognize team members",
+      "description": "Select team members to recognize for their performance this month",
+      "assigned_to": "E2001",
+      "due_date": "2025-03-30",
+      "priority": "medium",
+      "status": "pending",
+      "url": "/recognition/tasks/RE4001",
+      "completion_type": "selection"
+    }
+  ]

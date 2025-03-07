@@ -1,0 +1,44 @@
+[
+    {
+      "task_id": "ET4001",
+      "source_system": "employee",
+      "task_type": "assigned",
+      "title": "Complete quarterly performance reviews",
+      "description": "Submit performance evaluations for all direct reports",
+      "assigned_by": "E2004",
+      "assigned_to": "E2001",
+      "due_date": "2025-03-15",
+      "priority": "high",
+      "status": "pending",
+      "url": "/employee/tasks/ET4001",
+      "completion_type": "form"
+    },
+    {
+      "task_id": "ET4002",
+      "source_system": "employee",
+      "task_type": "assigned",
+      "title": "Sign updated employee handbook",
+      "description": "Review and acknowledge updated policies",
+      "assigned_by": "E2004",
+      "assigned_to": "E2001",
+      "due_date": "2025-03-20",
+      "priority": "low",
+      "status": "pending",
+      "url": "/employee/tasks/ET4002",
+      "completion_type": "document"
+    },
+    {
+      "task_id": "ET4003",
+      "source_system": "employee",
+      "task_type": "employee_care",
+      "title": "Respond to Avery's schedule question",
+      "description": "Avery has asked about changing their regular schedule. Please respond within 24 hours.",
+      "related_employee": "E2003",
+      "assigned_to": "E2001",
+      "due_date": "2025-03-08",
+      "priority": "medium",
+      "status": "pending",
+      "url": "/employee/tasks/ET4003",
+      "completion_type": "response"
+    }
+  ]

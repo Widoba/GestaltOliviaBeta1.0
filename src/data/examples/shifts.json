@@ -1,0 +1,23 @@
+[
+    {
+      "shift_id": "S3001",
+      "employee_id": "E2001",
+      "date": "2025-03-07",
+      "start_time": "08:00",
+      "end_time": "17:00",
+      "location": "Chicago Downtown",
+      "role": "Store Manager",
+      "status": "confirmed"
+    },
+    {
+      "shift_id": "S3004",
+      "employee_id": "E2002",
+      "date": "2025-03-08",
+      "start_time": "12:00",
+      "end_time": "21:00",
+      "location": "Chicago Downtown",
+      "role": "Sales Associate",
+      "status": "swap_requested",
+      "notes": "Family emergency"
+    }
+  ]

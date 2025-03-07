@@ -1,0 +1,277 @@
+{
+  "jobs": [
+    {
+      "id": "J001",
+      "title": "Senior Software Developer",
+      "department": "Engineering",
+      "location": "New York",
+      "workType": "Remote",
+      "postingDate": "2024-02-15",
+      "closingDate": "2024-03-31",
+      "status": "open",
+      "description": "We're looking for an experienced Senior Software Developer to join our engineering team. The ideal candidate will have strong expertise in backend development, database design, and cloud infrastructure.",
+      "requirements": [
+        "5+ years of experience in software development",
+        "Strong proficiency in Node.js, Python, or Java",
+        "Experience with cloud platforms (AWS, GCP, or Azure)",
+        "Understanding of microservices architecture",
+        "Experience with CI/CD pipelines",
+        "Strong problem-solving and debugging skills"
+      ],
+      "salary": {
+        "min": 120000,
+        "max": 150000,
+        "currency": "USD"
+      },
+      "hiringManager": "E005",
+      "applicationCount": 18,
+      "interviews": 4,
+      "priority": "high"
+    },
+    {
+      "id": "J002",
+      "title": "Marketing Specialist",
+      "department": "Marketing",
+      "location": "Chicago",
+      "workType": "Hybrid",
+      "postingDate": "2024-02-20",
+      "closingDate": "2024-03-20",
+      "status": "open",
+      "description": "We are seeking a Marketing Specialist to support our marketing campaigns across digital channels. This role will focus on content creation, campaign execution, and performance analysis.",
+      "requirements": [
+        "2+ years of experience in digital marketing",
+        "Proficiency in content creation and social media management",
+        "Experience with marketing analytics tools",
+        "Strong written and verbal communication skills",
+        "Bachelor's degree in Marketing, Communications, or related field"
+      ],
+      "salary": {
+        "min": 60000,
+        "max": 80000,
+        "currency": "USD"
+      },
+      "hiringManager": "E007",
+      "applicationCount": 25,
+      "interviews": 5,
+      "priority": "medium"
+    },
+    {
+      "id": "J003",
+      "title": "Sales Representative",
+      "department": "Sales",
+      "location": "Los Angeles",
+      "workType": "In-Office",
+      "postingDate": "2024-02-10",
+      "closingDate": "2024-03-15",
+      "status": "closing",
+      "description": "We are looking for an energetic Sales Representative to join our growing sales team. The successful candidate will be responsible for expanding our customer base and meeting sales targets.",
+      "requirements": [
+        "3+ years of B2B sales experience",
+        "Strong negotiation and closing skills",
+        "Experience with CRM software",
+        "Excellent communication and presentation abilities",
+        "Track record of meeting or exceeding sales targets"
+      ],
+      "salary": {
+        "min": 70000,
+        "max": 90000,
+        "currency": "USD",
+        "commission": "5-10% of sales"
+      },
+      "hiringManager": "E008",
+      "applicationCount": 32,
+      "interviews": 8,
+      "priority": "high"
+    },
+    {
+      "id": "J004",
+      "title": "HR Assistant",
+      "department": "Human Resources",
+      "location": "Boston",
+      "workType": "In-Office",
+      "postingDate": "2024-03-01",
+      "closingDate": "2024-04-01",
+      "status": "open",
+      "description": "We are seeking an HR Assistant to provide administrative support to our HR department. This role will assist with recruitment, onboarding, employee records, and general HR operations.",
+      "requirements": [
+        "1+ years of experience in HR or administrative role",
+        "Knowledge of HR processes and best practices",
+        "Excellent organization and attention to detail",
+        "Strong communication and interpersonal skills",
+        "Proficiency in Microsoft Office and HRIS systems"
+      ],
+      "salary": {
+        "min": 45000,
+        "max": 55000,
+        "currency": "USD"
+      },
+      "hiringManager": "E009",
+      "applicationCount": 15,
+      "interviews": 0,
+      "priority": "medium"
+    },
+    {
+      "id": "J005",
+      "title": "Junior Software Developer",
+      "department": "Engineering",
+      "location": "San Francisco",
+      "workType": "Hybrid",
+      "postingDate": "2024-02-25",
+      "closingDate": "2024-03-25",
+      "status": "open",
+      "description": "We're looking for a talented Junior Software Developer to join our engineering team. This role will focus on frontend development and user interface improvements.",
+      "requirements": [
+        "1-2 years of experience in software development",
+        "Proficiency in JavaScript, HTML, and CSS",
+        "Familiarity with React or similar frontend frameworks",
+        "Strong problem-solving skills",
+        "Bachelor's degree in Computer Science or related field"
+      ],
+      "salary": {
+        "min": 80000,
+        "max": 100000,
+        "currency": "USD"
+      },
+      "hiringManager": "E005",
+      "applicationCount": 27,
+      "interviews": 6,
+      "priority": "high"
+    },
+    {
+      "id": "J006",
+      "title": "Support Team Lead",
+      "department": "Customer Support",
+      "location": "Austin",
+      "workType": "Remote",
+      "postingDate": "2024-02-18",
+      "closingDate": "2024-03-18",
+      "status": "open",
+      "description": "We are looking for a Support Team Lead to manage our customer support team. The ideal candidate will have experience in customer service leadership and a passion for customer satisfaction.",
+      "requirements": [
+        "3+ years of experience in customer support",
+        "1+ years of team leadership experience",
+        "Strong problem-solving and conflict resolution skills",
+        "Excellent communication and interpersonal abilities",
+        "Experience with support ticketing systems"
+      ],
+      "salary": {
+        "min": 75000,
+        "max": 95000,
+        "currency": "USD"
+      },
+      "hiringManager": "E011",
+      "applicationCount": 12,
+      "interviews": 4,
+      "priority": "medium"
+    },
+    {
+      "id": "J007",
+      "title": "Product Manager",
+      "department": "Product",
+      "location": "Seattle",
+      "workType": "Hybrid",
+      "postingDate": "2024-02-05",
+      "closingDate": "2024-03-10",
+      "status": "closed",
+      "description": "We are seeking an experienced Product Manager to lead our product development initiatives. This role will be responsible for defining product strategy, roadmap, and features.",
+      "requirements": [
+        "5+ years of experience in product management",
+        "Track record of successful product launches",
+        "Strong analytical and project management skills",
+        "Excellent communication and leadership abilities",
+        "Technical background preferred"
+      ],
+      "salary": {
+        "min": 110000,
+        "max": 140000,
+        "currency": "USD"
+      },
+      "hiringManager": "E010",
+      "applicationCount": 30,
+      "interviews": 7,
+      "priority": "high",
+      "closeReason": "Position filled"
+    },
+    {
+      "id": "J008",
+      "title": "QA Engineer",
+      "department": "Engineering",
+      "location": "San Francisco",
+      "workType": "Hybrid",
+      "postingDate": "2024-03-01",
+      "closingDate": "2024-04-01",
+      "status": "open",
+      "description": "We are looking for a QA Engineer to ensure the quality of our software products. This role will be responsible for test planning, execution, and automation.",
+      "requirements": [
+        "3+ years of experience in software testing",
+        "Experience with test automation frameworks",
+        "Knowledge of Agile development methodologies",
+        "Strong analytical and problem-solving skills",
+        "Attention to detail and quality focus"
+      ],
+      "salary": {
+        "min": 90000,
+        "max": 110000,
+        "currency": "USD"
+      },
+      "hiringManager": "E005",
+      "applicationCount": 8,
+      "interviews": 0,
+      "priority": "medium"
+    },
+    {
+      "id": "J009",
+      "title": "Financial Analyst",
+      "department": "Finance",
+      "location": "New York",
+      "workType": "In-Office",
+      "postingDate": "2024-02-28",
+      "closingDate": "2024-03-28",
+      "status": "open",
+      "description": "We are seeking a Financial Analyst to support our finance team with budgeting, forecasting, and financial reporting. This role will work closely with department leaders on financial planning.",
+      "requirements": [
+        "3+ years of experience in financial analysis",
+        "Strong proficiency in Excel and financial modeling",
+        "Experience with financial reporting and forecasting",
+        "Bachelor's degree in Finance, Accounting, or related field",
+        "CPA or CFA preferred"
+      ],
+      "salary": {
+        "min": 80000,
+        "max": 100000,
+        "currency": "USD"
+      },
+      "hiringManager": "E012",
+      "applicationCount": 14,
+      "interviews": 3,
+      "priority": "medium"
+    },
+    {
+      "id": "J010",
+      "title": "Benefits Specialist",
+      "department": "Human Resources",
+      "location": "Boston",
+      "workType": "Hybrid",
+      "postingDate": "2024-02-12",
+      "closingDate": "2024-03-15",
+      "status": "interview",
+      "description": "We are looking for a Benefits Specialist to manage our employee benefits programs. This role will be responsible for benefits administration, employee inquiries, and vendor management.",
+      "requirements": [
+        "3+ years of experience in benefits administration",
+        "Knowledge of health insurance, retirement plans, and other benefits",
+        "Experience with HRIS and benefits administration systems",
+        "Strong communication and customer service skills",
+        "PHR or SHRM certification preferred"
+      ],
+      "salary": {
+        "min": 65000,
+        "max": 85000,
+        "currency": "USD"
+      },
+      "hiringManager": "E009",
+      "applicationCount": 20,
+      "interviews": 5,
+      "priority": "high"
+    }
+  ]
+}

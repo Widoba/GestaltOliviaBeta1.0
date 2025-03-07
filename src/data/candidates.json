@@ -1,0 +1,280 @@
+{
+  "candidates": [
+    {
+      "id": "C001",
+      "firstName": "Robert",
+      "lastName": "Chen",
+      "email": "robert.chen@email.com",
+      "phone": "555-111-2222",
+      "jobId": "J001",
+      "stage": "interview",
+      "applicationDate": "2024-02-18",
+      "lastUpdated": "2024-03-02",
+      "status": "active",
+      "resume": "URL_to_resume",
+      "skills": ["Node.js", "AWS", "Docker", "Microservices", "MongoDB"],
+      "experience": "7 years",
+      "education": "MS Computer Science, Stanford University",
+      "interviewFeedback": [
+        {
+          "interviewerId": "E005",
+          "date": "2024-03-01",
+          "score": 4.5,
+          "strengths": ["Technical expertise", "System design skills", "Communication"],
+          "weaknesses": ["Limited experience with our specific tech stack"],
+          "recommendation": "Strong hire"
+        }
+      ],
+      "notes": "Very strong candidate with excellent system design skills. Has worked on similar cloud-based solutions."
+    },
+    {
+      "id": "C002",
+      "firstName": "Sarah",
+      "lastName": "Johnson",
+      "email": "sarah.johnson@email.com",
+      "phone": "555-222-3333",
+      "jobId": "J002",
+      "stage": "screening",
+      "applicationDate": "2024-02-22",
+      "lastUpdated": "2024-02-28",
+      "status": "active",
+      "resume": "URL_to_resume",
+      "skills": ["Content Marketing", "SEO", "Social Media", "Google Analytics", "Adobe Creative Suite"],
+      "experience": "3 years",
+      "education": "BA Marketing, University of Illinois",
+      "notes": "Good experience with digital marketing campaigns. Previous work in the tech industry."
+    },
+    {
+      "id": "C003",
+      "firstName": "David",
+      "lastName": "Kim",
+      "email": "david.kim@email.com",
+      "phone": "555-333-4444",
+      "jobId": "J005",
+      "stage": "offer",
+      "applicationDate": "2024-02-26",
+      "lastUpdated": "2024-03-05",
+      "status": "active",
+      "resume": "URL_to_resume",
+      "skills": ["JavaScript", "React", "CSS", "HTML", "Git"],
+      "experience": "2 years",
+      "education": "BS Computer Science, UCLA",
+      "interviewFeedback": [
+        {
+          "interviewerId": "E001",
+          "date": "2024-03-01",
+          "score": 4.2,
+          "strengths": ["Strong frontend skills", "Problem-solving ability", "Enthusiasm"],
+          "weaknesses": ["Limited experience with backend technologies"],
+          "recommendation": "Hire"
+        },
+        {
+          "interviewerId": "E005",
+          "date": "2024-03-03",
+          "score": 4.0,
+          "strengths": ["Technical skills", "Team fit", "Learning potential"],
+          "weaknesses": ["Needs mentoring on advanced concepts"],
+          "recommendation": "Hire"
+        }
+      ],
+      "offerDetails": {
+        "salary": 90000,
+        "bonus": 5000,
+        "startDate": "2024-04-15",
+        "expirationDate": "2024-03-10"
+      },
+      "notes": "Strong junior candidate with great potential. Has another offer from a competitor."
+    },
+    {
+      "id": "C004",
+      "firstName": "Jessica",
+      "lastName": "Martinez",
+      "email": "jessica.martinez@email.com",
+      "phone": "555-444-5555",
+      "jobId": "J003",
+      "stage": "onsite",
+      "applicationDate": "2024-02-15",
+      "lastUpdated": "2024-03-04",
+      "status": "active",
+      "resume": "URL_to_resume",
+      "skills": ["B2B Sales", "CRM", "Negotiation", "Account Management", "Sales Strategy"],
+      "experience": "5 years",
+      "education": "BS Business Administration, Arizona State University",
+      "interviewFeedback": [
+        {
+          "interviewerId": "E008",
+          "date": "2024-02-28",
+          "score": 4.8,
+          "strengths": ["Sales experience", "Communication skills", "Energy"],
+          "weaknesses": ["Limited experience in our industry"],
+          "recommendation": "Strong hire"
+        }
+      ],
+      "notes": "Excellent sales record at previous company. Very engaging and professional."
+    },
+    {
+      "id": "C005",
+      "firstName": "Michael",
+      "lastName": "Thomas",
+      "email": "michael.thomas@email.com",
+      "phone": "555-555-6666",
+      "jobId": "J006",
+      "stage": "onsite",
+      "applicationDate": "2024-02-20",
+      "lastUpdated": "2024-03-05",
+      "status": "active",
+      "resume": "URL_to_resume",
+      "skills": ["Customer Support", "Team Leadership", "Zendesk", "Conflict Resolution", "Process Improvement"],
+      "experience": "4 years",
+      "education": "BA Communication, University of Texas",
+      "interviewFeedback": [
+        {
+          "interviewerId": "E011",
+          "date": "2024-03-01",
+          "score": 4.0,
+          "strengths": ["Leadership experience", "Customer-focused", "Analytical"],
+          "weaknesses": ["Could be more assertive"],
+          "recommendation": "Hire"
+        },
+        {
+          "interviewerId": "E006",
+          "date": "2024-03-03",
+          "score": 3.8,
+          "strengths": ["Support experience", "Process knowledge", "Communication"],
+          "weaknesses": ["Limited team leadership experience"],
+          "recommendation": "Maybe"
+        }
+      ],
+      "notes": "Good experience in support leadership. Would benefit from more training on our products."
+    },
+    {
+      "id": "C006",
+      "firstName": "Emily",
+      "lastName": "Wilson",
+      "email": "emily.wilson@email.com",
+      "phone": "555-666-7777",
+      "jobId": "J001",
+      "stage": "phone",
+      "applicationDate": "2024-02-24",
+      "lastUpdated": "2024-03-01",
+      "status": "active",
+      "resume": "URL_to_resume",
+      "skills": ["Java", "Spring Boot", "AWS", "CI/CD", "Kubernetes"],
+      "experience": "6 years",
+      "education": "BS Software Engineering, Georgia Tech",
+      "interviewFeedback": [
+        {
+          "interviewerId": "E001",
+          "date": "2024-03-01",
+          "score": 3.5,
+          "strengths": ["Technical knowledge", "System architecture experience"],
+          "weaknesses": ["Communication could be clearer", "Limited experience with our specific domain"],
+          "recommendation": "Maybe"
+        }
+      ],
+      "notes": "Strong technical background. Need to assess team fit in next round."
+    },
+    {
+      "id": "C007",
+      "firstName": "Marcus",
+      "lastName": "Jenkins",
+      "email": "marcus.jenkins@email.com",
+      "phone": "555-777-8888",
+      "jobId": "J008",
+      "stage": "screening",
+      "applicationDate": "2024-03-02",
+      "lastUpdated": "2024-03-05",
+      "status": "active",
+      "resume": "URL_to_resume",
+      "skills": ["Automated Testing", "Selenium", "JIRA", "API Testing", "Performance Testing"],
+      "experience": "4 years",
+      "education": "BS Computer Science, Penn State University",
+      "notes": "Strong testing background with good automation experience. Previous work in e-commerce."
+    },
+    {
+      "id": "C008",
+      "firstName": "Anna",
+      "lastName": "Garcia",
+      "email": "anna.garcia@email.com",
+      "phone": "555-888-9999",
+      "jobId": "J009",
+      "stage": "phone",
+      "applicationDate": "2024-03-01",
+      "lastUpdated": "2024-03-06",
+      "status": "active",
+      "resume": "URL_to_resume",
+      "skills": ["Financial Analysis", "Excel", "Financial Modeling", "Forecasting", "Budget Management"],
+      "experience": "3 years",
+      "education": "MBA Finance, NYU",
+      "interviewFeedback": [
+        {
+          "interviewerId": "E012",
+          "date": "2024-03-05",
+          "score": 4.2,
+          "strengths": ["Financial modeling skills", "Analytical ability", "Professional demeanor"],
+          "weaknesses": ["Limited experience with our industry"],
+          "recommendation": "Advance to onsite"
+        }
+      ],
+      "notes": "Strong analytical skills and good finance background. Could be a good fit for the team."
+    },
+    {
+      "id": "C009",
+      "firstName": "Jamal",
+      "lastName": "Washington",
+      "email": "jamal.washington@email.com",
+      "phone": "555-999-0000",
+      "jobId": "J003",
+      "stage": "assessment",
+      "applicationDate": "2024-02-18",
+      "lastUpdated": "2024-02-28",
+      "status": "active",
+      "resume": "URL_to_resume",
+      "skills": ["B2B Sales", "CRM Software", "Account Management", "Presentation Skills", "Lead Generation"],
+      "experience": "4 years",
+      "education": "BS Marketing, University of Michigan",
+      "assessmentResults": {
+        "salesAptitude": 85,
+        "personalityType": "ENFJ",
+        "strengths": ["Relationship building", "Negotiation", "Persistence"],
+        "areas_for_improvement": ["Technical knowledge", "Process adherence"]
+      },
+      "notes": "Good sales background with strong interpersonal skills. Passed initial assessment with high marks."
+    },
+    {
+      "id": "C010",
+      "firstName": "Sophia",
+      "lastName": "Lee",
+      "email": "sophia.lee@email.com",
+      "phone": "555-000-1111",
+      "jobId": "J010",
+      "stage": "onsite",
+      "applicationDate": "2024-02-14",
+      "lastUpdated": "2024-03-04",
+      "status": "active",
+      "resume": "URL_to_resume",
+      "skills": ["Benefits Administration", "HRIS Systems", "Compliance", "Employee Relations", "Vendor Management"],
+      "experience": "5 years",
+      "education": "BA Human Resources, Boston University",
+      "interviewFeedback": [
+        {
+          "interviewerId": "E004",
+          "date": "2024-02-25",
+          "score": 4.5,
+          "strengths": ["Benefits expertise", "Communication skills", "Process orientation"],
+          "weaknesses": ["Limited experience with our HRIS system"],
+          "recommendation": "Strong hire"
+        },
+        {
+          "interviewerId": "E009",
+          "date": "2024-03-03",
+          "score": 4.3,
+          "strengths": ["Technical knowledge", "Problem-solving", "Attention to detail"],
+          "weaknesses": ["Could be more assertive in difficult situations"],
+          "recommendation": "Hire"
+        }
+      ],
+      "notes": "Strong benefits specialist with excellent technical knowledge. Good cultural fit."
+    }
+  ]
+}
