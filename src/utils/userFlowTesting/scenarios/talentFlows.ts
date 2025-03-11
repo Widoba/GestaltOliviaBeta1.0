@@ -4,13 +4,14 @@
  * Test flows for recruitment, candidates, job postings, and hiring
  */
 
-import { TestFlow } from '../types';
+// Using require for CommonJS compatibility
+const { TestFlow } = require('../types');
 
 /**
  * Candidate Management Flow
  * Tests the assistant's ability to handle candidate-related queries
  */
-export const candidateManagementFlow: TestFlow = {
+const candidateManagementFlow = {
   id: 'candidate-management-flow',
   name: 'Candidate Management',
   description: 'Tests the assistant\'s ability to handle candidate queries and updates',
@@ -79,7 +80,7 @@ export const candidateManagementFlow: TestFlow = {
  * Job Posting Management Flow
  * Tests the assistant's ability to handle job posting queries and updates
  */
-export const jobPostingFlow: TestFlow = {
+const jobPostingFlow = {
   id: 'job-posting-flow',
   name: 'Job Posting Management',
   description: 'Tests the assistant\'s ability to handle job posting queries and updates',
@@ -139,7 +140,7 @@ export const jobPostingFlow: TestFlow = {
  * Interview Process Flow
  * Tests the assistant's ability to handle interview scheduling and feedback
  */
-export const interviewProcessFlow: TestFlow = {
+const interviewProcessFlow = {
   id: 'interview-process-flow',
   name: 'Interview Process',
   description: 'Tests the assistant\'s ability to handle interview scheduling and feedback',
@@ -200,7 +201,7 @@ export const interviewProcessFlow: TestFlow = {
  * Hiring Workflow Flow
  * Tests the assistant's ability to handle the hiring process
  */
-export const hiringWorkflowFlow: TestFlow = {
+const hiringWorkflowFlow = {
   id: 'hiring-workflow-flow',
   name: 'Hiring Workflow',
   description: 'Tests the assistant\'s ability to handle the hiring process from offer to onboarding',
@@ -253,7 +254,7 @@ export const hiringWorkflowFlow: TestFlow = {
  * Talent Error Handling Flow
  * Tests how the assistant handles errors in talent-related scenarios
  */
-export const talentErrorFlow: TestFlow = {
+const talentErrorFlow = {
   id: 'talent-error-flow',
   name: 'Talent Error Handling',
   description: 'Tests the assistant\'s ability to handle errors in talent-related scenarios',
@@ -298,11 +299,21 @@ export const talentErrorFlow: TestFlow = {
   ]
 };
 
-// Export all talent flows
-export const talentFlows: TestFlow[] = [
+// Create the talent flows array
+const talentFlows = [
   candidateManagementFlow,
   jobPostingFlow,
   interviewProcessFlow,
   hiringWorkflowFlow,
   talentErrorFlow
 ];
+
+// Export for CommonJS
+module.exports = {
+  talentFlows,
+  candidateManagementFlow,
+  jobPostingFlow,
+  interviewProcessFlow,
+  hiringWorkflowFlow,
+  talentErrorFlow
+};

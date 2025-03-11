@@ -3,9 +3,33 @@
  */
 
 // Import using require for CommonJS compatibility
-const { Message } = require('../../contexts/ChatContext');
-const { DetectedEntity, IntentCategory } = require('../../services/queryAnalysisService');
-const { AssistantType } = require('../../prompts');
+// Use empty objects as fallbacks if modules can't be loaded (for CLI testing)
+let Message = {};
+let DetectedEntity = {};
+let IntentCategory = {};
+let AssistantType = {};
+
+try {
+  const chatContext = require('../../contexts/ChatContext');
+  Message = chatContext.Message || {};
+} catch (e) {
+  console.warn('Warning: ChatContext module not loaded');
+}
+
+try {
+  const queryAnalysisService = require('../../services/queryAnalysisService');
+  DetectedEntity = queryAnalysisService.DetectedEntity || {};
+  IntentCategory = queryAnalysisService.IntentCategory || {};
+} catch (e) {
+  console.warn('Warning: queryAnalysisService module not loaded');
+}
+
+try {
+  const prompts = require('../../prompts');
+  AssistantType = prompts.AssistantType || {};
+} catch (e) {
+  console.warn('Warning: prompts module not loaded');
+}
 
 // Define all interfaces as standard JS objects/classes to work with CommonJS
 

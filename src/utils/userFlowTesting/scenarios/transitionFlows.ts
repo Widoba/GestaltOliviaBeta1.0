@@ -4,13 +4,14 @@
  * Test flows for transitions between assistant types and context preservation
  */
 
-import { TestFlow } from '../types';
+// Using require for CommonJS compatibility
+const { TestFlow } = require('../types');
 
 /**
  * Employee to Talent Transition Flow
  * Tests the assistant's ability to transition from employee to talent context
  */
-export const employeeToTalentFlow: TestFlow = {
+const employeeToTalentFlow = {
   id: 'employee-to-talent-flow',
   name: 'Employee to Talent Transition',
   description: 'Tests transitioning from employee assistant to talent acquisition assistant',
@@ -80,7 +81,7 @@ export const employeeToTalentFlow: TestFlow = {
  * Talent to Employee Transition Flow
  * Tests the assistant's ability to transition from talent to employee context
  */
-export const talentToEmployeeFlow: TestFlow = {
+const talentToEmployeeFlow = {
   id: 'talent-to-employee-flow',
   name: 'Talent to Employee Transition',
   description: 'Tests transitioning from talent acquisition assistant to employee assistant',
@@ -147,7 +148,7 @@ export const talentToEmployeeFlow: TestFlow = {
  * Ambiguous Query Handling Flow
  * Tests the assistant's ability to handle queries that could fit either context
  */
-export const ambiguousQueryFlow: TestFlow = {
+const ambiguousQueryFlow = {
   id: 'ambiguous-query-flow',
   name: 'Ambiguous Query Handling',
   description: 'Tests the assistant\'s ability to handle ambiguous queries that could fit either context',
@@ -211,7 +212,7 @@ export const ambiguousQueryFlow: TestFlow = {
  * Multi-Intent Query Flow
  * Tests the assistant's ability to handle queries with multiple intents
  */
-export const multiIntentFlow: TestFlow = {
+const multiIntentFlow = {
   id: 'multi-intent-flow',
   name: 'Multi-Intent Query Handling',
   description: 'Tests the assistant\'s ability to handle queries that contain multiple intents',
@@ -265,7 +266,7 @@ export const multiIntentFlow: TestFlow = {
  * Context Preservation Flow
  * Tests the assistant's ability to maintain context across transitions
  */
-export const contextPreservationFlow: TestFlow = {
+const contextPreservationFlow = {
   id: 'context-preservation-flow',
   name: 'Context Preservation',
   description: 'Tests the assistant\'s ability to maintain context across assistant transitions',
@@ -321,11 +322,21 @@ export const contextPreservationFlow: TestFlow = {
   ]
 };
 
-// Export all transition flows
-export const transitionFlows: TestFlow[] = [
+// Create the transition flows array
+const transitionFlows = [
   employeeToTalentFlow,
   talentToEmployeeFlow,
   ambiguousQueryFlow,
   multiIntentFlow,
   contextPreservationFlow
 ];
+
+// Export for CommonJS
+module.exports = {
+  transitionFlows,
+  employeeToTalentFlow,
+  talentToEmployeeFlow,
+  ambiguousQueryFlow,
+  multiIntentFlow,
+  contextPreservationFlow
+};

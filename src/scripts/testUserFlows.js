@@ -1,11 +1,11 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env node
 /**
  * User Flow Testing CLI
  * 
  * Command line interface for executing user flow tests.
  * 
  * Usage:
- *   ts-node testUserFlows.ts [command] [options]
+ *   node testUserFlows.js [command] [options]
  * 
  * Commands:
  *   run [flowIds...]  Run specific flows by ID
@@ -26,11 +26,11 @@ const fs = require('fs');
 const path = require('path');
 
 // Using require for CommonJS compatibility
-const userFlowTestingFramework = require('../utils/userFlowTesting/userFlowTestingFramework').default;
-const scenarios = require('../utils/userFlowTesting/scenarios');
+const userFlowTestingFramework = require('../utils/userFlowTesting/userFlowTestingFramework.js').default;
+const scenarios = require('../utils/userFlowTesting/scenarios/index.js');
 const allFlows = scenarios.default;
 const { employeeFlows, talentFlows, transitionFlows, endToEndFlows } = scenarios;
-const { TestFlowCategory, TestExecutionOptions, TestFlow } = require('../utils/userFlowTesting/types');
+const { TestFlowCategory } = require('../utils/userFlowTesting/types.js');
 
 // Register all flows with the framework
 userFlowTestingFramework.registerFlows(allFlows);
@@ -39,16 +39,8 @@ userFlowTestingFramework.registerFlows(allFlows);
 const args = process.argv.slice(2);
 const command = args[0] || 'help';
 
-// Parse options with explicit type definitions
-const options: {
-  verbose: boolean;
-  saveResults: boolean;
-  stopOnFailure: boolean;
-  timeout?: number;
-  flowIds?: string[];
-  categories?: string[];
-  tags?: string[];
-} = {
+// Parse options
+const options = {
   verbose: args.includes('--verbose'),
   saveResults: args.includes('--save'),
   stopOnFailure: args.includes('--stop-on-failure')
@@ -135,7 +127,7 @@ User Flow Testing CLI
 =====================
 
 Usage:
-  ts-node testUserFlows.ts [command] [options]
+  node testUserFlows.js [command] [options]
 
 Commands:
   run [flowIds...]   Run specific flows by ID
@@ -153,19 +145,19 @@ Options:
   
 Examples:
   # Run all flows
-  ts-node testUserFlows.ts all
+  node testUserFlows.js all
   
   # Run specific flows
-  ts-node testUserFlows.ts run employee-schedule-flow employee-task-flow
+  node testUserFlows.js run employee-schedule-flow employee-task-flow
   
   # Run all flows in a category
-  ts-node testUserFlows.ts category employee
+  node testUserFlows.js category employee
   
   # Run flows with specific tags
-  ts-node testUserFlows.ts tag happy-path transition
+  node testUserFlows.js tag happy-path transition
   
   # List all flows
-  ts-node testUserFlows.ts list
+  node testUserFlows.js list
   `);
 }
 
@@ -179,22 +171,22 @@ function listFlows() {
   console.log('====================\n');
   
   console.log('Employee Flows:');
-  employeeFlows.forEach((flow: any) => {
+  employeeFlows.forEach((flow) => {
     console.log(`  - ${flow.id}: ${flow.name} (${flow.steps.length} steps) [${flow.tags.join(', ')}]`);
   });
   
   console.log('\nTalent Flows:');
-  talentFlows.forEach((flow: any) => {
+  talentFlows.forEach((flow) => {
     console.log(`  - ${flow.id}: ${flow.name} (${flow.steps.length} steps) [${flow.tags.join(', ')}]`);
   });
   
   console.log('\nTransition Flows:');
-  transitionFlows.forEach((flow: any) => {
+  transitionFlows.forEach((flow) => {
     console.log(`  - ${flow.id}: ${flow.name} (${flow.steps.length} steps) [${flow.tags.join(', ')}]`);
   });
   
   console.log('\nEnd-to-End Flows:');
-  endToEndFlows.forEach((flow: any) => {
+  endToEndFlows.forEach((flow) => {
     console.log(`  - ${flow.id}: ${flow.name} (${flow.steps.length} steps) [${flow.tags.join(', ')}]`);
   });
   
@@ -207,8 +199,8 @@ function listFlows() {
     ...transitionFlows,
     ...endToEndFlows
   ];
-  allFlowsArray.forEach((flow: any) => {
-    flow.tags.forEach((tag: string) => tags.add(tag));
+  allFlowsArray.forEach((flow) => {
+    flow.tags.forEach((tag) => tags.add(tag));
   });
   console.log(`  ${Array.from(tags).join(', ')}`);
   
@@ -256,13 +248,13 @@ function showReport() {
   }
   
   console.log('\nCategory Results:');
-  Object.entries(report.categories || {}).forEach(([category, results]: [string, any]) => {
+  Object.entries(report.categories || {}).forEach(([category, results]) => {
     console.log(`- ${category}: ${results.flows} flows, ${(results.passRate * 100).toFixed(1)}% pass rate`);
   });
   
   console.log('\nFlow Results:');
-  report.flowResults.forEach((result: any) => {
-    console.log(`- ${result.flowId}: ${result.successful ? '✓ PASSED' : '✗ FAILED'} (${result.steps.filter((s: any) => s.passed).length}/${result.steps.length} steps passed)`);
+  report.flowResults.forEach((result) => {
+    console.log(`- ${result.flowId}: ${result.successful ? '✓ PASSED' : '✗ FAILED'} (${result.steps.filter((s) => s.passed).length}/${result.steps.length} steps passed)`);
   });
   
   console.log('\nFor detailed results, see the test-results directory.');

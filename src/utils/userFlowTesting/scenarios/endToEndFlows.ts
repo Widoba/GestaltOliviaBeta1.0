@@ -4,13 +4,14 @@
  * Complex test flows that simulate complete user journeys across multiple domains
  */
 
-import { TestFlow } from '../types';
+// Using require for CommonJS compatibility
+const { TestFlow } = require('../types');
 
 /**
  * Daily Manager Workflow Flow
  * Simulates a manager's typical daily workflow across both domains
  */
-export const dailyManagerFlow: TestFlow = {
+const dailyManagerFlow = {
   id: 'daily-manager-flow',
   name: 'Daily Manager Workflow',
   description: 'A comprehensive flow simulating a store manager\'s daily workflow',
@@ -114,7 +115,7 @@ export const dailyManagerFlow: TestFlow = {
  * New Hire Onboarding Journey
  * Simulates the entire journey of hiring and onboarding a new employee
  */
-export const newHireJourneyFlow: TestFlow = {
+const newHireJourneyFlow = {
   id: 'new-hire-journey-flow',
   name: 'New Hire Onboarding Journey',
   description: 'A comprehensive flow simulating the entire process from recruitment to onboarding',
@@ -224,7 +225,7 @@ export const newHireJourneyFlow: TestFlow = {
  * Store Performance Management Journey
  * Simulates a manager analyzing store performance and taking actions
  */
-export const storePerformanceFlow: TestFlow = {
+const storePerformanceFlow = {
   id: 'store-performance-flow',
   name: 'Store Performance Management',
   description: 'A comprehensive flow simulating performance review and action planning',
@@ -325,9 +326,17 @@ export const storePerformanceFlow: TestFlow = {
   ]
 };
 
-// Export all end-to-end flows
-export const endToEndFlows: TestFlow[] = [
+// Create the end-to-end flows array
+const endToEndFlows = [
   dailyManagerFlow,
   newHireJourneyFlow,
   storePerformanceFlow
 ];
+
+// Export for CommonJS
+module.exports = {
+  endToEndFlows,
+  dailyManagerFlow,
+  newHireJourneyFlow,
+  storePerformanceFlow
+};

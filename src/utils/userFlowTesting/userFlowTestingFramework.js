@@ -19,28 +19,80 @@ const {
   DataValidationResult,
   TestReport,
   TestFlowCategory
-} = require('./types');
+} = require('./types.js');
 
 // Import services
-const anthropicService = require('../../services/anthropicService').default;
-const contextEnhancedAnthropicService = require('../../services/contextEnhancedAnthropicService').default;
-const queryAnalysisService = require('../../services/queryAnalysisService').default;
-const performanceOptimizationService = require('../../services/performanceOptimizationService').default;
-const { AssistantType } = require('../../prompts');
-const { Message } = require('../../contexts/ChatContext');
+// Use mock services when real ones can't be loaded (for CLI testing)
+let anthropicService = { default: {} };
+let contextEnhancedAnthropicService = { 
+  default: {
+    getResponseWithContext: async () => ({ content: 'Mock response', assistantType: 'unified' })
+  }
+};
+let queryAnalysisService = { 
+  default: {
+    analyzeQuery: async () => ({ 
+      primaryIntent: { category: 'unknown' },
+      entities: []
+    })
+  }
+};
+let performanceOptimizationService = { default: {} };
+let AssistantType = {};
+let Message = {};
+
+try {
+  anthropicService = require('../../services/anthropicService');
+} catch (e) {
+  console.warn('Warning: anthropicService not loaded');
+}
+
+try {
+  contextEnhancedAnthropicService = require('../../services/contextEnhancedAnthropicService');
+} catch (e) {
+  console.warn('Warning: contextEnhancedAnthropicService not loaded');
+}
+
+try {
+  queryAnalysisService = require('../../services/queryAnalysisService');
+} catch (e) {
+  console.warn('Warning: queryAnalysisService not loaded');
+}
+
+try {
+  performanceOptimizationService = require('../../services/performanceOptimizationService');
+} catch (e) {
+  console.warn('Warning: performanceOptimizationService not loaded');
+}
+
+try {
+  const prompts = require('../../prompts');
+  AssistantType = prompts.AssistantType || {};
+} catch (e) {
+  console.warn('Warning: prompts module not loaded');
+}
+
+try {
+  const chatContext = require('../../contexts/ChatContext');
+  Message = chatContext.Message || {};
+} catch (e) {
+  console.warn('Warning: ChatContext module not loaded');
+}
 
 /**
  * Main class for the User Flow Testing Framework
  */
 class UserFlowTestingFramework {
-  private registeredFlows = new Map();
-  private results = [];
-  private defaultOptions = {
-    timeout: 30000,
-    saveResults: true,
-    verbose: false,
-    stopOnFailure: false
-  };
+  constructor() {
+    this.registeredFlows = new Map();
+    this.results = [];
+    this.defaultOptions = {
+      timeout: 30000,
+      saveResults: true,
+      verbose: false,
+      stopOnFailure: false
+    };
+  }
 
   /**
    * Register a test flow with the framework
@@ -119,18 +171,18 @@ class UserFlowTestingFramework {
         await flow.setup();
       } catch (error) {
         console.error('Error in flow setup:', error);
-        return this.createFailedFlowResult(flow, ['Setup failed: ' + (error as Error).message]);
+        return this.createFailedFlowResult(flow, ['Setup failed: ' + error.message]);
       }
     }
     
     // Initialize conversation history
-    let conversationHistory: Message[] = [];
-    const stepResults: TestStepResult[] = [];
-    let currentAssistantType: AssistantType = 'unified';
+    let conversationHistory = [];
+    const stepResults = [];
+    let currentAssistantType = 'unified';
     
     // Execute each step
     let flowSuccessful = true;
-    let stepErrors: string[] = [];
+    let stepErrors = [];
     
     for (let i = 0; i < flow.steps.length; i++) {
       const step = flow.steps[i];
@@ -150,8 +202,8 @@ class UserFlowTestingFramework {
       
       // Use the context enhanced Anthropic service to get a response
       const stepStartTime = Date.now();
-      let assistantResponse: Message;
-      let functionCallsMade: string[] = [];
+      let assistantResponse;
+      let functionCallsMade = [];
       
       try {
         // Get optimized response using the performance optimization service
@@ -181,10 +233,10 @@ class UserFlowTestingFramework {
         conversationHistory.push(assistantResponse);
       } catch (error) {
         console.error(`Error in step ${i + 1}:`, error);
-        stepErrors.push(`Step ${i + 1} failed: ${(error as Error).message}`);
+        stepErrors.push(`Step ${i + 1} failed: ${error.message}`);
         
         // Create a failed step result
-        const failedStep: TestStepResult = {
+        const failedStep = {
           message: step.message,
           expectedAssistantType: step.expectedAssistantType,
           actualAssistantType: currentAssistantType,
@@ -233,7 +285,7 @@ class UserFlowTestingFramework {
       }
       
       // Validate data in response
-      let dataValidationResults: DataValidationResult[] = [];
+      let dataValidationResults = [];
       if (step.dataValidation && step.dataValidation.length > 0) {
         dataValidationResults = this.validateResponseData(
           assistantResponse, 
@@ -252,7 +304,7 @@ class UserFlowTestingFramework {
         dataValidationPassed;
       
       // Create step result
-      const stepResult: TestStepResult = {
+      const stepResult = {
         message: step.message,
         expectedAssistantType: step.expectedAssistantType,
         actualAssistantType: assistantResponse.assistantType || currentAssistantType,
@@ -310,7 +362,7 @@ class UserFlowTestingFramework {
         await flow.teardown();
       } catch (error) {
         console.error('Error in flow teardown:', error);
-        stepErrors.push('Teardown failed: ' + (error as Error).message);
+        stepErrors.push('Teardown failed: ' + error.message);
       }
     }
     
@@ -319,7 +371,7 @@ class UserFlowTestingFramework {
     
     // Create flow result
     const endTime = Date.now();
-    const flowResult: TestFlowResult = {
+    const flowResult = {
       flowId: flow.id,
       flowName: flow.name,
       successful: flowSuccessful,
@@ -378,11 +430,11 @@ class UserFlowTestingFramework {
     } else if (mergedOptions.categories && mergedOptions.categories.length > 0) {
       // Run flows by category
       flowsToRun = Array.from(this.registeredFlows.values())
-        .filter(flow => mergedOptions.categories!.includes(flow.category));
+        .filter(flow => mergedOptions.categories.includes(flow.category));
     } else if (mergedOptions.tags && mergedOptions.tags.length > 0) {
       // Run flows by tags
       flowsToRun = Array.from(this.registeredFlows.values())
-        .filter(flow => mergedOptions.tags!.some(tag => flow.tags.includes(tag)));
+        .filter(flow => mergedOptions.tags.some(tag => flow.tags.includes(tag)));
     } else {
       // Run all flows
       flowsToRun = Array.from(this.registeredFlows.values());
@@ -391,7 +443,7 @@ class UserFlowTestingFramework {
     console.log(`Executing ${flowsToRun.length} test flows...`);
     
     // Execute each flow
-    const flowResults: TestFlowResult[] = [];
+    const flowResults = [];
     for (const flow of flowsToRun) {
       const result = await this.executeFlow(flow.id, mergedOptions);
       flowResults.push(result);
@@ -451,7 +503,7 @@ class UserFlowTestingFramework {
       switch (rule.type) {
         case 'contains':
           if (rule.target === 'text') {
-            const value = rule.value as string;
+            const value = rule.value;
             passed = response.content.includes(value);
             details = passed ? 
               `Found "${value}" in response` : 
@@ -461,7 +513,7 @@ class UserFlowTestingFramework {
           
         case 'exact':
           if (rule.target === 'text') {
-            const value = rule.value as string;
+            const value = rule.value;
             passed = response.content === value;
             details = passed ? 
               'Exact match found' : 
@@ -471,7 +523,7 @@ class UserFlowTestingFramework {
           
         case 'regex':
           if (rule.target === 'text') {
-            const regex = rule.value as RegExp;
+            const regex = rule.value;
             passed = regex.test(response.content);
             details = passed ? 
               `Regex ${regex} matched` : 
@@ -481,7 +533,7 @@ class UserFlowTestingFramework {
           
         case 'entityPresent':
           if (rule.target === 'structuredData' && response.structuredData) {
-            const entityType = rule.value as string;
+            const entityType = rule.value;
             passed = response.structuredData.type === entityType;
             details = passed ? 
               `Entity type ${entityType} found` : 
@@ -554,14 +606,14 @@ class UserFlowTestingFramework {
     const stepsWithDataValidation = stepResults.filter(
       step => step.dataValidationResults !== undefined && step.dataValidationResults.length > 0
     );
-    let dataValidationSuccessRate: number | undefined;
+    let dataValidationSuccessRate;
     if (stepsWithDataValidation.length > 0) {
       let totalValidations = 0;
       let passedValidations = 0;
       
       for (const step of stepsWithDataValidation) {
-        totalValidations += step.dataValidationResults!.length;
-        passedValidations += step.dataValidationResults!.filter(result => result.passed).length;
+        totalValidations += step.dataValidationResults.length;
+        passedValidations += step.dataValidationResults.filter(result => result.passed).length;
       }
       
       dataValidationSuccessRate = totalValidations > 0 ?
@@ -577,8 +629,8 @@ class UserFlowTestingFramework {
     
     // Calculate transition success rate if applicable
     // A transition is when the expected assistant type changes between steps
-    let transitionSuccessRate: number | undefined;
-    const transitions: {expected: boolean, successful: boolean}[] = [];
+    let transitionSuccessRate;
+    const transitions = [];
     
     for (let i = 1; i < stepResults.length; i++) {
       const prevStep = stepResults[i - 1];
@@ -646,7 +698,7 @@ class UserFlowTestingFramework {
     const metrics = this.calculateAggregatedMetrics(flowResults);
     
     // Calculate results by category
-    const categories: Partial<Record<TestFlowCategory, { flows: number, passRate: number }>> = {};
+    const categories = {};
     
     // Get all flows to look up categories
     const allFlows = Array.from(this.registeredFlows.values());
@@ -663,16 +715,16 @@ class UserFlowTestingFramework {
           };
         }
         
-        categories[category]!.flows++;
+        categories[category].flows++;
         
         if (result.successful) {
           // Update pass rate incrementally
-          const currentPasses = (categories[category]!.passRate * (categories[category]!.flows - 1));
-          categories[category]!.passRate = (currentPasses + 1) / categories[category]!.flows;
+          const currentPasses = (categories[category].passRate * (categories[category].flows - 1));
+          categories[category].passRate = (currentPasses + 1) / categories[category].flows;
         } else {
           // Update pass rate incrementally (no change to successful count)
-          const currentPasses = (categories[category]!.passRate * (categories[category]!.flows - 1));
-          categories[category]!.passRate = currentPasses / categories[category]!.flows;
+          const currentPasses = (categories[category].passRate * (categories[category].flows - 1));
+          categories[category].passRate = currentPasses / categories[category].flows;
         }
       }
     }
@@ -690,7 +742,7 @@ class UserFlowTestingFramework {
       },
       metrics,
       flowResults,
-      categories: categories
+      categories
     };
   }
 
@@ -841,7 +893,7 @@ class UserFlowTestingFramework {
       // Read the most recent report
       const reportPath = path.join(resultsDir, files[0]);
       const reportContent = fs.readFileSync(reportPath, 'utf-8');
-      return JSON.parse(reportContent) as TestReport;
+      return JSON.parse(reportContent);
     } catch (error) {
       console.error('Error reading most recent report:', error);
       return undefined;

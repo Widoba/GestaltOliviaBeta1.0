@@ -4,13 +4,14 @@
  * Test flows for employee management, schedules, tasks, and recognition
  */
 
-import { TestFlow } from '../types';
+// Using require for CommonJS compatibility
+const { TestFlow } = require('../types');
 
 /**
  * Employee Schedule Management Flow
  * Tests the assistant's ability to handle employee schedule queries
  */
-export const employeeScheduleFlow: TestFlow = {
+const employeeScheduleFlow = {
   id: 'employee-schedule-flow',
   name: 'Employee Schedule Management',
   description: 'Tests the assistant\'s ability to handle employee schedule queries and updates',
@@ -78,7 +79,7 @@ export const employeeScheduleFlow: TestFlow = {
  * Employee Task Management Flow
  * Tests the assistant's ability to handle employee task queries and updates
  */
-export const employeeTaskFlow: TestFlow = {
+const employeeTaskFlow = {
   id: 'employee-task-flow',
   name: 'Employee Task Management',
   description: 'Tests the assistant\'s ability to handle task management and updates',
@@ -139,7 +140,7 @@ export const employeeTaskFlow: TestFlow = {
  * Employee Recognition Flow
  * Tests the assistant's ability to handle employee recognition
  */
-export const employeeRecognitionFlow: TestFlow = {
+const employeeRecognitionFlow = {
   id: 'employee-recognition-flow',
   name: 'Employee Recognition',
   description: 'Tests the assistant\'s ability to handle employee recognition and feedback',
@@ -189,7 +190,7 @@ export const employeeRecognitionFlow: TestFlow = {
  * Employee Information Flow
  * Tests the assistant's ability to retrieve and display employee information
  */
-export const employeeInfoFlow: TestFlow = {
+const employeeInfoFlow = {
   id: 'employee-info-flow',
   name: 'Employee Information',
   description: 'Tests the assistant\'s ability to retrieve and display employee information',
@@ -247,7 +248,7 @@ export const employeeInfoFlow: TestFlow = {
  * Employee Error Handling Flow
  * Tests how the assistant handles errors in employee-related scenarios
  */
-export const employeeErrorFlow: TestFlow = {
+const employeeErrorFlow = {
   id: 'employee-error-flow',
   name: 'Employee Error Handling',
   description: 'Tests the assistant\'s ability to handle errors in employee-related scenarios',
@@ -291,11 +292,21 @@ export const employeeErrorFlow: TestFlow = {
   ]
 };
 
-// Export all employee flows
-export const employeeFlows: TestFlow[] = [
+// Create the employee flows array
+const employeeFlows = [
   employeeScheduleFlow,
   employeeTaskFlow,
   employeeRecognitionFlow,
   employeeInfoFlow,
   employeeErrorFlow
 ];
+
+// Export for CommonJS
+module.exports = {
+  employeeFlows,
+  employeeScheduleFlow,
+  employeeTaskFlow,
+  employeeRecognitionFlow,
+  employeeInfoFlow,
+  employeeErrorFlow
+};

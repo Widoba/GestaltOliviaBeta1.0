@@ -9,7 +9,7 @@ const { employeeFlows } = require('./employeeFlows');
 const { talentFlows } = require('./talentFlows');
 const { transitionFlows } = require('./transitionFlows');
 const { endToEndFlows } = require('./endToEndFlows');
-const { TestFlow } = require('../types');
+const { TestFlow } = require('../types.js');
 
 // Combine all flows into a single array
 const allFlows = [
